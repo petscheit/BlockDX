@@ -163,6 +163,7 @@ BITCOIN_CORE_H = \
   utilmoneystr.h \
   utiltime.h \
   validationinterface.h \
+  validationstate.h \
   version.h \
   wallet.h \
   wallet_ismine.h \
@@ -353,9 +354,10 @@ libxbridge_xbridge_a_SOURCES = \
   xbridge/xbridgeexchange.cpp \
   xbridge/xbridgesession.cpp \
   xbridge/xbridgeservicesession.cpp \
-  xbridge/xbridgesessionbtc.cpp \
   xbridge/xbridgetransaction.cpp \
   xbridge/xbridgetransactionmember.cpp \
+  xbridge/xbridgewalletconnectorbtc.cpp \
+  xbridge/xbridgewalletconnectorbcc.cpp \
   xbridge/xkey.cpp \
   xbridge/xpubkey.cpp \
   xbridge/xbitcoinaddress.cpp \
@@ -375,11 +377,12 @@ libxbridge_xbridge_a_SOURCES = \
   xbridge/xbridgerpc.h \
   xbridge/xbridgesession.h \
   xbridge/xbridgeservicesession.h \
-  xbridge/xbridgesessionbtc.h \
   xbridge/xbridgetransaction.h \
   xbridge/xbridgetransactiondescr.h \
   xbridge/xbridgetransactionmember.h \
   xbridge/xbridgewallet.h \
+  xbridge/xbridgewalletconnectorbtc.h \
+  xbridge/xbridgewalletconnectorbcc.h \
   xbridge/xkey.h \
   xbridge/xpubkey.h \
   xbridge/xuiconnector.h \
