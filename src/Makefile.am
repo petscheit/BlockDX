@@ -355,6 +355,7 @@ libxbridge_xbridge_a_SOURCES = \
   xbridge/xbridgesession.cpp \
   xbridge/xbridgetransaction.cpp \
   xbridge/xbridgetransactionmember.cpp \
+  xbridge/xbridgewalletconnector.h \
   xbridge/xbridgewalletconnectorbtc.cpp \
   xbridge/xbridgewalletconnectorbcc.cpp \
   xbridge/xkey.cpp \
@@ -379,6 +380,7 @@ libxbridge_xbridge_a_SOURCES = \
   xbridge/xbridgetransactiondescr.h \
   xbridge/xbridgetransactionmember.h \
   xbridge/xbridgewallet.h \
+  xbridge/xbridgewalletconnector.h \
   xbridge/xbridgewalletconnectorbtc.h \
   xbridge/xbridgewalletconnectorbcc.h \
   xbridge/xkey.h \
