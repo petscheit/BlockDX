@@ -73,6 +73,14 @@ namespace rpc
                               std::string & txid,
                               std::string & tx);
 
+    bool decodeRawTransaction(const std::string & rpcuser,
+                              const std::string & rpcpasswd,
+                              const std::string & rpcip,
+                              const std::string & rpcport,
+                              const std::string & rawtx,
+                              std::vector<std::pair<std::string, int> >& prevtx,
+                              std::string& scriptPubKey);
+
     std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::string, std::string> > & prevtxs);
 
     bool signRawTransaction(const std::string & rpcuser,

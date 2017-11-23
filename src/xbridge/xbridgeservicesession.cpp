@@ -38,6 +38,12 @@ XBridgeServiceSession::~XBridgeServiceSession()
 
 }
 
+std::string XBridgeServiceSession::fromXAddr(const string& addr) const
+{
+    assert(!"not implemented in service session");
+    return std::string();
+}
+
 //*****************************************************************************
 //*****************************************************************************
 std::vector<unsigned char> XBridgeServiceSession::toXAddr(const std::string & /*addr*/) const

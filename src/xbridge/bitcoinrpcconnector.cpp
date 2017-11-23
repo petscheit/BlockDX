@@ -533,7 +533,7 @@ bool createRawTransaction(const std::string & rpcuser,
                           const std::string & rpcpasswd,
                           const std::string & rpcip,
                           const std::string & rpcport,
-                          const std::vector<std::pair<string, int> > & inputs,
+                          const std::vector<std::pair<std::string, int> > & inputs,
                           const std::vector<std::pair<std::string, double> > & outputs,
                           const uint32_t lockTime,
                           std::string & tx)
@@ -658,6 +658,104 @@ bool decodeRawTransaction(const std::string & rpcuser,
         if (vtxid.type() == str_type)
         {
             txid = vtxid.get_str();
+        }
+    }
+    catch (std::exception & e)
+    {
+        LOG() << "decoderawtransaction exception " << e.what();
+        return false;
+    }
+
+    return true;
+}
+
+//*****************************************************************************
+//*****************************************************************************
+bool decodeRawTransaction(const std::string & rpcuser,
+                          const std::string & rpcpasswd,
+                          const std::string & rpcip,
+                          const std::string & rpcport,
+                          const std::string & rawtx,
+                          std::vector<std::pair<std::string, int> > & prevtx,
+                          std::string & scriptPubKey)
+{
+    try
+    {
+        LOG() << "rpc call <decoderawtransaction>";
+
+        Array params;
+        params.push_back(rawtx);
+        Object reply = CallRPC(rpcuser, rpcpasswd, rpcip, rpcport,
+                               "decoderawtransaction", params);
+
+        // Parse reply
+        const Value & result = find_value(reply, "result");
+        const Value & error  = find_value(reply, "error");
+
+        if (error.type() != null_type)
+        {
+            // Error
+            LOG() << "error: " << write_string(error, false);
+            // int code = find_value(error.get_obj(), "code").get_int();
+            return false;
+        }
+        else if (result.type() != obj_type)
+        {
+            // Result
+            LOG() << "result not an object " <<
+                     (result.type() == null_type ? "" :
+                      result.type() == str_type  ? result.get_str() :
+                                                   write_string(result, true));
+            return false;
+        }
+
+        const Value & vvin = find_value(result.get_obj(), "vin");
+        if(vvin.type() == array_type)
+        {
+            Array arr = vvin.get_array();
+
+            if(arr.empty())
+                return false;
+
+            for(const Value & tr : arr)
+            {
+                if(tr.type() == obj_type)
+                {
+                    const Value & vtxid = find_value(tr.get_obj(), "txid");
+                    const Value & vvout = find_value(tr.get_obj(), "vout");
+
+                    if(vtxid.type() == str_type && vvout.type() == int_type)
+                    {
+                        prevtx.push_back(std::make_pair(vtxid.get_str(), vvout.get_int()));
+                    }
+                }
+            }
+        }
+
+        const Value & vvout = find_value(result.get_obj(), "vout");
+        if(vvout.type() == array_type)
+        {
+            Array arr = vvout.get_array();
+
+            if(arr.empty())
+                return false;
+
+            const Value & vvout0 = arr.at(0);
+
+            if(vvout0.type() == obj_type)
+            {
+                const Value & vscriptPubKeyObj = find_value(vvout0.get_obj(), "scriptPubKey");
+
+                if(vscriptPubKeyObj.type() == obj_type)
+                {
+                    const Value & vscriptPubKey = find_value(vscriptPubKeyObj.get_obj(), "hex");
+
+                    if(vscriptPubKey.type() == str_type)
+                    {
+                        scriptPubKey = vscriptPubKey.get_str();
+                    }
+                }
+            }
         }
     }
     catch (std::exception & e)

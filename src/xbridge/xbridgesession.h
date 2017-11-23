@@ -63,7 +63,7 @@ public:
 
 protected:
     // reimplement for currency
-    // virtual std::string fromXAddr(const std::vector<unsigned char> & xaddr) const = 0;
+    virtual std::string fromXAddr(const std::string & addr) const = 0;
     virtual std::vector<unsigned char> toXAddr(const std::string & addr) const = 0;
 
     virtual uint32_t lockTime(const char role) const = 0;
