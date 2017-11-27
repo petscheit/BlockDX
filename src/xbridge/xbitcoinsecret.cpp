@@ -10,11 +10,11 @@ namespace xbridge
 
 //******************************************************************************
 //******************************************************************************
-void CBitcoinSecret::SetKey(const CKey& vchSecret)
+void CBitcoinSecret::SetKey(const CKey& vchSecret, const std::vector<unsigned char>& version)
 {
     assert(vchSecret.IsValid());
-    std::vector<unsigned char> pref(1, 0);
-    SetData(pref, vchSecret.begin(), vchSecret.end());
+    //std::vector<unsigned char> pref(1, 0);
+    SetData(version, vchSecret.begin(), vchSecret.end());
     if (vchSecret.IsCompressed())
         vchData.push_back(1);
 }

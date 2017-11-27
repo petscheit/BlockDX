@@ -919,12 +919,43 @@ bool XBridgeSession::processTransactionInit(XBridgePacketPtr packet)
     xtx->role = role;
 
     // m key
+    if(role == 'A')
     {
         xbridge::CKey km;
         km.MakeNewKey(true);
 
         xtx->mPubKey = km.GetPubKey();
-        xtx->mSecret = xbridge::CBitcoinSecret(km);
+        std::vector<unsigned char> versionPrefix;
+
+        XBridgeApp & xapp = XBridgeApp::instance();
+        XBridgeSessionPtr sptr = xapp.sessionByCurrency(fromCurrency);
+        if (!sptr)
+        {
+            assert(!"unknown currency");
+            return true;
+        }
+
+        versionPrefix.push_back(sptr->walletParam().secretPrefix[0]);
+        xtx->mSecret = xbridge::CBitcoinSecret(km, versionPrefix);
+    }
+    else if(role == 'B')
+    {
+        xbridge::CKey km;
+        km.MakeNewKey(true);
+
+        xtx->mPubKey = km.GetPubKey();
+        std::vector<unsigned char> versionPrefix;
+
+        XBridgeApp & xapp = XBridgeApp::instance();
+        XBridgeSessionPtr sptr = xapp.sessionByCurrency(toCurrency);
+        if (!sptr)
+        {
+            assert(!"unknown currency");
+            return true;
+        }
+
+        versionPrefix.push_back(sptr->walletParam().secretPrefix[0]);
+        xtx->mSecret = xbridge::CBitcoinSecret(km, versionPrefix);
     }
 
     // x key
@@ -1349,7 +1380,7 @@ bool XBridgeSession::processTransactionCreate(XBridgePacketPtr packet)
                     << OP_DUP << OP_HASH160 << xtx->mPubKey.GetID() << OP_EQUALVERIFY << OP_CHECKSIG
               << OP_ELSE
                     << OP_HASH160 << hx << OP_EQUALVERIFY
-                    << OP_DUP << OP_HASH160 << mPubkey.GetID() << OP_EQUALVERIFY << OP_CHECKSIGVERIFY
+                    << OP_DUP << OP_HASH160 << mPubkey.GetID() << OP_EQUALVERIFY << OP_CHECKSIG
               << OP_ENDIF;
 
         xbridge::XBitcoinAddress baddr;
@@ -1487,9 +1518,9 @@ bool XBridgeSession::processTransactionCreate(XBridgePacketPtr packet)
 
         std::vector<std::pair<std::string, int> > vins;
         std::string scriptPubKey;
-        if(rpc::decodeRawTransaction(m_wallet.user, m_wallet.passwd,
-                                     m_wallet.ip, m_wallet.port,
-                                     paytx, vins, scriptPubKey))
+        if(!rpc::decodeRawTransaction(m_wallet.user, m_wallet.passwd,
+                                      m_wallet.ip, m_wallet.port,
+                                      paytx, vins, scriptPubKey))
         {
             // cancel transaction
             LOG() << "decode unsigned transaction error, transaction canceled " << __FUNCTION__;
@@ -1504,13 +1535,12 @@ bool XBridgeSession::processTransactionCreate(XBridgePacketPtr packet)
         }
 
         std::vector<std::string> keys;
-        std::string privkey(xtx->mSecret.GetKey().GetPrivKey().begin(), xtx->mSecret.GetKey().GetPrivKey().end());
-        keys.push_back(privkey);
+        keys.push_back(xtx->mSecret.ToString());
 
         bool complete = false;
-        if(rpc::signRawTransaction(m_wallet.user, m_wallet.passwd,
-                                   m_wallet.ip, m_wallet.port,
-                                   paytx, rpc::prevtxsJson(prevtxs), keys, complete))
+        if(!rpc::signRawTransaction(m_wallet.user, m_wallet.passwd,
+                                    m_wallet.ip, m_wallet.port,
+                                    paytx, rpc::prevtxsJson(prevtxs), keys, complete))
         {
             // cancel transaction
             LOG() << "sign transaction error, transaction canceled " << __FUNCTION__;
@@ -1862,9 +1892,9 @@ bool XBridgeSession::processTransactionConfirmA(XBridgePacketPtr packet)
 
         std::vector<std::pair<std::string, int> > vins;
         std::string scriptPubKey;
-        if(rpc::decodeRawTransaction(m_wallet.user, m_wallet.passwd,
-                                     m_wallet.ip, m_wallet.port,
-                                     paytx, vins, scriptPubKey))
+        if(!rpc::decodeRawTransaction(m_wallet.user, m_wallet.passwd,
+                                      m_wallet.ip, m_wallet.port,
+                                      paytx, vins, scriptPubKey))
         {
             // cancel transaction
             LOG() << "decode unsigned transaction error, transaction canceled " << __FUNCTION__;
@@ -1879,13 +1909,12 @@ bool XBridgeSession::processTransactionConfirmA(XBridgePacketPtr packet)
         }
 
         std::vector<std::string> keys;
-        std::string privkey(xtx->mSecret.GetKey().GetPrivKey().begin(), xtx->mSecret.GetKey().GetPrivKey().end());
-        keys.push_back(privkey);
+        keys.push_back(xtx->mSecret.ToString());
 
         bool complete = false;
-        if(rpc::signRawTransaction(m_wallet.user, m_wallet.passwd,
-                                   m_wallet.ip, m_wallet.port,
-                                   paytx, rpc::prevtxsJson(prevtxs), keys, complete))
+        if(!rpc::signRawTransaction(m_wallet.user, m_wallet.passwd,
+                                    m_wallet.ip, m_wallet.port,
+                                    paytx, rpc::prevtxsJson(prevtxs), keys, complete))
         {
             // cancel transaction
             LOG() << "sign transaction error, transaction canceled " << __FUNCTION__;
@@ -2122,9 +2151,9 @@ bool XBridgeSession::processTransactionConfirmB(XBridgePacketPtr packet)
 
         std::vector<std::pair<std::string, int> > vins;
         std::string scriptPubKey;
-        if(rpc::decodeRawTransaction(m_wallet.user, m_wallet.passwd,
-                                     m_wallet.ip, m_wallet.port,
-                                     paytx, vins, scriptPubKey))
+        if(!rpc::decodeRawTransaction(m_wallet.user, m_wallet.passwd,
+                                      m_wallet.ip, m_wallet.port,
+                                      paytx, vins, scriptPubKey))
         {
             // cancel transaction
             LOG() << "decode unsigned transaction error, transaction canceled " << __FUNCTION__;
@@ -2139,13 +2168,12 @@ bool XBridgeSession::processTransactionConfirmB(XBridgePacketPtr packet)
         }
 
         std::vector<std::string> keys;
-        std::string privkey(xtx->mSecret.GetKey().GetPrivKey().begin(), xtx->mSecret.GetKey().GetPrivKey().end());
-        keys.push_back(privkey);
+        keys.push_back(xtx->mSecret.ToString());
 
         bool complete = false;
-        if(rpc::signRawTransaction(m_wallet.user, m_wallet.passwd,
-                                   m_wallet.ip, m_wallet.port,
-                                   paytx, rpc::prevtxsJson(prevtxs), keys, complete))
+        if(!rpc::signRawTransaction(m_wallet.user, m_wallet.passwd,
+                                    m_wallet.ip, m_wallet.port,
+                                    paytx, rpc::prevtxsJson(prevtxs), keys, complete))
         {
             // cancel transaction
             LOG() << "sign transaction error, transaction canceled " << __FUNCTION__;

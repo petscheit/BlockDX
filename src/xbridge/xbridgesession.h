@@ -43,6 +43,8 @@ public:
 
     bool processPacket(XBridgePacketPtr packet);
 
+    const WalletParam walletParam() const { return m_wallet; }
+
 public:
     static std::vector<unsigned char> toXAddr(const std::string & addr, const std::string & currency);
 

@@ -12,13 +12,14 @@ namespace xbridge
 class CBitcoinSecret : public CBase58Data
 {
 public:
-    void SetKey(const CKey& vchSecret);
+    void SetKey(const CKey& vchSecret, const std::vector<unsigned char>& version);
     CKey GetKey();
     bool IsValid() const;
     bool SetString(const char* pszSecret);
     bool SetString(const std::string& strSecret);
 
-    CBitcoinSecret(const CKey& vchSecret) { SetKey(vchSecret); }
+    CBitcoinSecret(const CKey& vchSecret) { SetKey(vchSecret, std::vector<unsigned char>(1, 0)); }
+    CBitcoinSecret(const CKey& vchSecret, const std::vector<unsigned char>& version)  { SetKey(vchSecret, version); }
     CBitcoinSecret() {}
 };
 
