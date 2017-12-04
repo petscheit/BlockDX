@@ -71,9 +71,18 @@ public:
 
     virtual bool signRawTransaction(std::string & rawtx, bool & complete) = 0;
 
+    virtual bool signRawTransaction(std::string & rawtx,
+                                    const std::vector<std::tuple<std::string, int, std::string, std::string> > & prevtxs,
+                                    const std::vector<std::string> & keys,
+                                    bool & complete) = 0;
+
     virtual bool decodeRawTransaction(const std::string & rawtx,
                                       std::string & txid,
                                       std::string & tx) = 0;
+
+    virtual bool decodeRawTransaction(const std::string & rawtx,
+                                      std::vector<std::pair<std::string, int> > & prevtx,
+                                      std::string & scriptPubKey) = 0;
 
     virtual bool sendRawTransaction(const std::string & rawtx,
                                     std::string & txid,

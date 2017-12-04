@@ -811,6 +811,104 @@ bool decodeRawTransaction(const std::string & rpcuser,
 
 //*****************************************************************************
 //*****************************************************************************
+bool decodeRawTransaction(const std::string & rpcuser,
+                          const std::string & rpcpasswd,
+                          const std::string & rpcip,
+                          const std::string & rpcport,
+                          const std::string & rawtx,
+                          std::vector<std::pair<std::string, int> > & prevtx,
+                          std::string & scriptPubKey)
+{
+    try
+    {
+        LOG() << "rpc call <decoderawtransaction>";
+
+        Array params;
+        params.push_back(rawtx);
+        Object reply = CallRPC(rpcuser, rpcpasswd, rpcip, rpcport,
+                               "decoderawtransaction", params);
+
+        // Parse reply
+        const Value & result = find_value(reply, "result");
+        const Value & error  = find_value(reply, "error");
+
+        if (error.type() != null_type)
+        {
+            // Error
+            LOG() << "error: " << write_string(error, false);
+            // int code = find_value(error.get_obj(), "code").get_int();
+            return false;
+        }
+        else if (result.type() != obj_type)
+        {
+            // Result
+            LOG() << "result not an object " <<
+                     (result.type() == null_type ? "" :
+                      result.type() == str_type  ? result.get_str() :
+                                                   write_string(result, true));
+            return false;
+        }
+
+        const Value & vvin = find_value(result.get_obj(), "vin");
+        if(vvin.type() == array_type)
+        {
+            Array arr = vvin.get_array();
+
+            if(arr.empty())
+                return false;
+
+            for(const Value & tr : arr)
+            {
+                if(tr.type() == obj_type)
+                {
+                    const Value & vtxid = find_value(tr.get_obj(), "txid");
+                    const Value & vvout = find_value(tr.get_obj(), "vout");
+
+                    if(vtxid.type() == str_type && vvout.type() == int_type)
+                    {
+                        prevtx.push_back(std::make_pair(vtxid.get_str(), vvout.get_int()));
+                    }
+                }
+            }
+        }
+
+        const Value & vvout = find_value(result.get_obj(), "vout");
+        if(vvout.type() == array_type)
+        {
+            Array arr = vvout.get_array();
+
+            if(arr.empty())
+                return false;
+
+            const Value & vvout0 = arr.at(0);
+
+            if(vvout0.type() == obj_type)
+            {
+                const Value & vscriptPubKeyObj = find_value(vvout0.get_obj(), "scriptPubKey");
+
+                if(vscriptPubKeyObj.type() == obj_type)
+                {
+                    const Value & vscriptPubKey = find_value(vscriptPubKeyObj.get_obj(), "hex");
+
+                    if(vscriptPubKey.type() == str_type)
+                    {
+                        scriptPubKey = vscriptPubKey.get_str();
+                    }
+                }
+            }
+        }
+    }
+    catch (std::exception & e)
+    {
+        LOG() << "decoderawtransaction exception " << e.what();
+        return false;
+    }
+
+    return true;
+}
+
+//*****************************************************************************
+//*****************************************************************************
 bool sendRawTransaction(const std::string & rpcuser,
                         const std::string & rpcpasswd,
                         const std::string & rpcip,
@@ -1000,6 +1098,21 @@ bool XBridgeBtcWalletConnector::signRawTransaction(std::string & rawtx, bool & c
     return true;
 }
 
+bool XBridgeBtcWalletConnector::signRawTransaction(string & rawtx,
+                                                   const std::vector<std::tuple<std::string, int, std::string, std::string> > & prevtxs,
+                                                   const std::vector<string> & keys,
+                                                   bool & complete)
+{
+    if (!rpc::signRawTransaction(m_user, m_passwd, m_ip, m_port,
+                                 rawtx, rpc::prevtxsJson(prevtxs), keys, complete))
+    {
+        LOG() << "rpc::createRawTransaction failed" << __FUNCTION__;
+        return false;
+    }
+
+    return true;
+}
+
 //******************************************************************************
 //******************************************************************************
 bool XBridgeBtcWalletConnector::decodeRawTransaction(const std::string & rawtx,
@@ -1009,7 +1122,23 @@ bool XBridgeBtcWalletConnector::decodeRawTransaction(const std::string & rawtx,
     if (!rpc::decodeRawTransaction(m_user, m_passwd, m_ip, m_port,
                                    rawtx, txid, tx))
     {
-        LOG() << "rpc::createRawTransaction failed" << __FUNCTION__;
+        LOG() << "rpc::decodeRawTransaction failed" << __FUNCTION__;
+        return false;
+    }
+
+    return true;
+}
+
+//******************************************************************************
+//******************************************************************************
+bool XBridgeBtcWalletConnector::decodeRawTransaction(const string & rawtx,
+                                                     std::vector<std::pair<string, int> > & prevtx,
+                                                     string & scriptPubKey)
+{
+    if (!rpc::decodeRawTransaction(m_user, m_passwd, m_ip, m_port,
+                                   rawtx, prevtx, scriptPubKey))
+    {
+        LOG() << "rpc::decodeRawTransaction failed" << __FUNCTION__;
         return false;
     }
 
@@ -1043,6 +1172,9 @@ bool XBridgeBtcWalletConnector::newKeyPair(std::vector<unsigned char> & pubkey,
     xbridge::CPubKey pub = km.GetPubKey();
     pubkey = std::vector<unsigned char>(pub.begin(), pub.end());
     privkey = std::vector<unsigned char>(km.begin(), km.end());
+    privkey.emplace(privkey.begin(), secretPrefix[0]);
+    if(km.IsCompressed())
+        privkey.push_back(1);
 
     return true;
 }
@@ -1206,8 +1338,8 @@ bool XBridgeBtcWalletConnector::createDepositUnlockScript(const std::vector<unsi
                 << lockTime << OP_CHECKLOCKTIMEVERIFY << OP_DROP
                 << OP_DUP << OP_HASH160 << getKeyId(myPubKey) << OP_EQUALVERIFY << OP_CHECKSIG
           << OP_ELSE
-                << OP_DUP << OP_HASH160 << getKeyId(otherPubKey) << OP_EQUALVERIFY << OP_CHECKSIGVERIFY
-                << OP_HASH160 << xdata << OP_EQUAL
+                << OP_HASH160 << xdata << OP_EQUALVERIFY
+                << OP_DUP << OP_HASH160 << getKeyId(otherPubKey) << OP_EQUALVERIFY << OP_CHECKSIG
           << OP_ENDIF;
 
 //    xbridge::XBitcoinAddress baddr;

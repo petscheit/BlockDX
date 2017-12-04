@@ -35,9 +35,18 @@ public:
 
     bool signRawTransaction(std::string & rawtx, bool & complete);
 
+    bool signRawTransaction(std::string & rawtx,
+                            const std::vector<std::tuple<std::string, int, std::string, std::string> > & prevtxs,
+                            const std::vector<std::string> & keys,
+                            bool & complete);
+
     bool decodeRawTransaction(const std::string & rawtx,
                               std::string & txid,
                               std::string & tx);
+
+    bool decodeRawTransaction(const std::string & rawtx,
+                              std::vector<std::pair<std::string, int> > & prevtx,
+                              std::string & scriptPubKey);
 
     bool sendRawTransaction(const std::string & rawtx,
                             std::string & txid,
