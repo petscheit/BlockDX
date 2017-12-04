@@ -1514,7 +1514,9 @@ bool XBridgeSession::processTransactionCreate(XBridgePacketPtr packet)
         CScript inner(vchinner.begin(), vchinner.end());
 
         CScript redeem;
-        redeem << rawm << OP_TRUE << inner;
+        redeem << rawm << OP_TRUE;
+        std::string redeemStr = HexStr(redeem.begin(), redeem.end());
+        redeemStr.append(xtx->innerScript);
 
         std::vector<std::pair<std::string, int> > vins;
         std::string scriptPubKey;
@@ -1531,7 +1533,7 @@ bool XBridgeSession::processTransactionCreate(XBridgePacketPtr packet)
         std::vector<std::tuple<std::string, int, std::string, std::string> > prevtxs;
         for(std::pair<std::string, int> vin : vins)
         {
-            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeem.ToString()));
+            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeemStr));
         }
 
         std::vector<std::string> keys;
