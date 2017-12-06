@@ -57,7 +57,6 @@ bool XBridgeBccWalletConnector::createRefundTransaction(const std::vector<std::p
     redeem << mpubKey << OP_TRUE << innerScript;
 
     std::string redeemStr = HexStr(redeem.begin(), redeem.end());
-//    redeemStr.append(std::string(innerScript.begin(), innerScript.end()));
 
     std::vector<std::pair<std::string, int> > vins;
     std::string scriptPubKey;
@@ -75,7 +74,7 @@ bool XBridgeBccWalletConnector::createRefundTransaction(const std::vector<std::p
     }
 
     std::vector<std::string> privKeys;
-    privKeys.push_back(HexStr(mprivKey.begin(), mprivKey.end()));
+    privKeys.push_back(EncodeBase58Check(mprivKey));
 
     bool complete = false;
     if(!signRawTransaction(refundTx, prevtxs, privKeys, complete))
@@ -209,7 +208,7 @@ bool XBridgeBccWalletConnector::createPaymentTransaction(const std::vector<std::
     }
 
     std::vector<std::string> privKeys;
-    privKeys.push_back(std::string(mprivKey.begin(), mprivKey.end()));
+    privKeys.push_back(EncodeBase58Check(mprivKey));
 
     bool complete = false;
     if(!signRawTransaction(payTx, prevtxs, privKeys, complete))

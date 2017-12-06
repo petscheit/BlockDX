@@ -70,7 +70,7 @@ XBridgeSession::~XBridgeSession()
 //*****************************************************************************
 //*****************************************************************************
 void XBridgeSession::init()
-{ 
+{
     if(m_handlers.size())
     {
         LOG() << "packet handlers map must be empty" << __FUNCTION__;
@@ -933,10 +933,10 @@ bool XBridgeSession::processTransactionInit(XBridgePacketPtr packet)
     xtx->role = role;
 
     XBridgeApp & xapp = XBridgeApp::instance();
-    XBridgeWalletConnectorPtr conn = xapp.connectorByCurrency(xtx->toCurrency);
+    XBridgeWalletConnectorPtr conn = xapp.connectorByCurrency(xtx->fromCurrency);
     if (!conn)
     {
-        WARN() << "no connector for <" << xtx->toCurrency << "> " << __FUNCTION__;
+        WARN() << "no connector for <" << xtx->fromCurrency << "> " << __FUNCTION__;
         return true;
     }
 
