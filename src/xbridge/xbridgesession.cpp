@@ -1530,10 +1530,10 @@ bool XBridgeSession::processTransactionCreate(XBridgePacketPtr packet)
             return true;
         }
 
-        std::vector<std::tuple<std::string, int, std::string, std::string> > prevtxs;
+        std::vector<std::tuple<std::string, int, std::string, std::string, double> > prevtxs;
         for(std::pair<std::string, int> vin : vins)
         {
-            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeemStr));
+            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeemStr, inAmount));
         }
 
         std::vector<std::string> keys;
@@ -1865,9 +1865,10 @@ bool XBridgeSession::processTransactionConfirmA(XBridgePacketPtr packet)
         // inputs from binTx
         inputs.push_back(std::make_pair(binTxId, 0));
 
+        double outAmount = static_cast<double>(xtx->toAmount)/XBridgeTransactionDescr::COIN;
         // outputs
         {
-            double outAmount = static_cast<double>(xtx->toAmount)/XBridgeTransactionDescr::COIN;
+
             outputs.push_back(std::make_pair(conn->fromXAddr(xtx->to), outAmount));
         }
 
@@ -1904,10 +1905,10 @@ bool XBridgeSession::processTransactionConfirmA(XBridgePacketPtr packet)
             return true;
         }
 
-        std::vector<std::tuple<std::string, int, std::string, std::string> > prevtxs;
+        std::vector<std::tuple<std::string, int, std::string, std::string, double> > prevtxs;
         for(std::pair<std::string, int> vin : vins)
         {
-            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeem.ToString()));
+            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeem.ToString(), outAmount));
         }
 
         std::vector<std::string> keys;
@@ -2124,9 +2125,9 @@ bool XBridgeSession::processTransactionConfirmB(XBridgePacketPtr packet)
         // inputs from binTx
         inputs.push_back(std::make_pair(binTxId, 0));
 
+        double outAmount = static_cast<double>(xtx->toAmount)/XBridgeTransactionDescr::COIN;
         // outputs
         {
-            double outAmount = static_cast<double>(xtx->toAmount)/XBridgeTransactionDescr::COIN;
             outputs.push_back(std::make_pair(conn->fromXAddr(xtx->to), outAmount));
         }
 
@@ -2163,10 +2164,10 @@ bool XBridgeSession::processTransactionConfirmB(XBridgePacketPtr packet)
             return true;
         }
 
-        std::vector<std::tuple<std::string, int, std::string, std::string> > prevtxs;
+        std::vector<std::tuple<std::string, int, std::string, std::string, double> > prevtxs;
         for(std::pair<std::string, int> vin : vins)
         {
-            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeem.ToString()));
+            prevtxs.push_back(std::make_tuple(vin.first, vin.second, scriptPubKey, redeem.ToString(), outAmount));
         }
 
         std::vector<std::string> keys;

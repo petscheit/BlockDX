@@ -81,7 +81,7 @@ namespace rpc
                               std::vector<std::pair<std::string, int> >& prevtx,
                               std::string& scriptPubKey);
 
-    std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::string, std::string> > & prevtxs);
+    std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::string, std::string, double> > & prevtxs);
 
     bool signRawTransaction(const std::string & rpcuser,
                             const std::string & rpcpasswd,

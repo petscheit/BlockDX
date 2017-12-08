@@ -822,7 +822,7 @@ bool decodeRawTransaction(const std::string & rpcuser,
 
 //*****************************************************************************
 //*****************************************************************************
-std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::string, std::string> > & prevtxs)
+std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::string, std::string, double> > & prevtxs)
 {
     // prevtxs
     if (!prevtxs.size())
@@ -831,7 +831,7 @@ std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::stri
     }
 
     Array arrtx;
-    for (const std::tuple<std::string, int, std::string, std::string> & prev : prevtxs)
+    for (const std::tuple<std::string, int, std::string, std::string, double> & prev : prevtxs)
     {
         Object o;
         o.push_back(Pair("txid",         std::get<0>(prev)));
@@ -842,6 +842,8 @@ std::string prevtxsJson(const std::vector<std::tuple<std::string, int, std::stri
         {
             o.push_back(Pair("redeemScript", redeem));
         }
+        o.push_back(Pair("amount", std::get<4>(prev)));
+        
         arrtx.push_back(o);
     }
 
@@ -857,7 +859,7 @@ bool signRawTransaction(const std::string & rpcuser,
                         std::string & rawtx,
                         bool & complete)
 {
-    std::vector<std::tuple<std::string, int, std::string, std::string> > arr;
+    std::vector<std::tuple<std::string, int, std::string, std::string, double> > arr;
     std::string prevtxs = prevtxsJson(arr);
     std::vector<string> keys;
     return signRawTransaction(rpcuser, rpcpasswd, rpcip, rpcport,
