@@ -45,8 +45,11 @@ public:
     std::vector<unsigned char> vchSig;
     //removed stop
 
+    std::string servicenodeSalt;
+
     CServicenodePing();
     CServicenodePing(const CTxIn & newVin);
+    CServicenodePing(const CTxIn & newVin, const std::string & snSalt);
 
     ADD_SERIALIZE_METHODS;
 
@@ -57,6 +60,10 @@ public:
         READWRITE(blockHash);
         READWRITE(sigTime);
         READWRITE(vchSig);
+        if(nVersion >= SERVICENODE_WITH_XBRIDGE_INFO_PROTO_VERSION)
+        {
+            READWRITE(LIMITED_STRING(servicenodeSalt, 32));
+        }
     }
 
     bool CheckAndUpdate(int& nDos, bool fRequireEnabled = true);
@@ -68,6 +75,7 @@ public:
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
         ss << vin;
         ss << sigTime;
+        ss << servicenodeSalt;
         return ss.GetHash();
     }
 
@@ -163,6 +171,8 @@ public:
     // xbridge wallets list, connected to service node
     std::vector<CServicenodeXWallet> connectedWallets;
 
+    std::string servicenodeSalt;
+
     int64_t nLastDsee;  // temporary, do not save. Remove after migration to v12
     int64_t nLastDseep; // temporary, do not save. Remove after migration to v12
 
@@ -195,6 +205,7 @@ public:
         swap(first.nScanningErrorCount, second.nScanningErrorCount);
         swap(first.nLastScanningErrorBlockHeight, second.nLastScanningErrorBlockHeight);
         swap(first.connectedWallets, second.connectedWallets);
+        swap(first.servicenodeSalt, second.servicenodeSalt);
     }
 
     CServicenode& operator=(CServicenode from)
@@ -236,6 +247,7 @@ public:
         READWRITE(nLastDsq);
         READWRITE(nScanningErrorCount);
         READWRITE(nLastScanningErrorBlockHeight);
+        READWRITE(LIMITED_STRING(servicenodeSalt, 32));
     }
 
     int64_t SecondsSincePayment();
@@ -320,7 +332,8 @@ public:
                           const CPubKey & pubKeyCollateralAddressNew,
                           const CPubKey & pubKeyServicenodeNew,
                           const int protocolVersionIn,
-                          const std::vector<std::string> & exchangeWallets);
+                          const std::vector<std::string> & exchangeWallets,
+                          const std::string & snSalt);
     CServicenodeBroadcast(const CServicenode& mn);
 
     bool CheckAndUpdate(int& nDoS);
@@ -342,6 +355,10 @@ public:
         READWRITE(protocolVersion);
         READWRITE(lastPing);
         READWRITE(nLastDsq);
+        if(nVersion >= SERVICENODE_WITH_XBRIDGE_INFO_PROTO_VERSION)
+        {
+            READWRITE(LIMITED_STRING(servicenodeSalt, 32));
+        }
         if (nType == SER_NETWORK && nVersion >= SERVICENODE_WITH_XBRIDGE_INFO_PROTO_VERSION)
         {
             READWRITE(connectedWallets);
@@ -357,6 +374,7 @@ public:
         CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
         ss << sigTime;
         ss << pubKeyCollateralAddress;
+        ss << servicenodeSalt;
         return ss.GetHash();
     }
 
@@ -368,6 +386,7 @@ public:
                        const CKey & keyServicenodeNew,
                        const CPubKey & pubKeyServicenodeNew,
                        const std::vector<string> & exchangeWallets,
+                       const std::string & snSalt,
                        std::string & strErrorRet,
                        CServicenodeBroadcast & mnbRet);
     static bool Create(const std::string & strService,
@@ -375,6 +394,7 @@ public:
                        const std::string & strTxHash,
                        const std::string & strOutputIndex,
                        const std::vector<string> & exchangeWallets,
+                       const std::string & snSalt,
                        std::string & strErrorRet,
                        CServicenodeBroadcast & mnbRet,
                        const bool fOffline = false);

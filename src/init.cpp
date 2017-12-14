@@ -1567,6 +1567,8 @@ bool AppInit2(boost::thread_group& threadGroup)
         } else {
             return InitError(_("You must specify a servicenodeprivkey in the configuration. Please see documentation for help."));
         }
+
+        activeServicenode.servicenodeSalt = GetArg("-servicenodesalt", "");
     }
 
     //get the mode of budget voting for this servicenode

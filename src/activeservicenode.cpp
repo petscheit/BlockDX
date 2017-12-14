@@ -169,7 +169,7 @@ bool CActiveServicenode::SendServicenodePing(std::string& errorMessage)
 
     LogPrintf("CActiveServicenode::SendServicenodePing() - Relay Servicenode Ping vin = %s\n", vin.ToString());
 
-    CServicenodePing mnp(vin);
+    CServicenodePing mnp(vin, servicenodeSalt);
     if (!mnp.Sign(keyServicenode, pubKeyServicenode)) {
         errorMessage = "Couldn't sign Servicenode Ping";
         return false;
@@ -286,7 +286,7 @@ bool CActiveServicenode::Register(std::string strService, std::string strKeyServ
 bool CActiveServicenode::Register(CTxIn vin, CService service, CKey keyCollateralAddress, CPubKey pubKeyCollateralAddress, CKey keyServicenode, CPubKey pubKeyServicenode, std::string& errorMessage)
 {
     CServicenodeBroadcast mnb;
-    CServicenodePing mnp(vin);
+    CServicenodePing mnp(vin, servicenodeSalt);
     if (!mnp.Sign(keyServicenode, pubKeyServicenode)) {
         errorMessage = strprintf("Failed to sign ping, vin: %s", vin.ToString());
         LogPrintf("CActiveServicenode::Register() -  %s\n", errorMessage);
@@ -301,7 +301,7 @@ bool CActiveServicenode::Register(CTxIn vin, CService service, CKey keyCollatera
     mnb = CServicenodeBroadcast(service, vin,
                                 pubKeyCollateralAddress, pubKeyServicenode,
                                 PROTOCOL_VERSION,
-                                e.isEnabled() ? e.connectedWallets() : std::vector<std::string>());
+                                e.isEnabled() ? e.connectedWallets() : std::vector<std::string>(), servicenodeSalt);
     mnb.lastPing = mnp;
     if (!mnb.Sign(keyCollateralAddress)) {
         errorMessage = strprintf("Failed to sign broadcast, vin: %s", vin.ToString());

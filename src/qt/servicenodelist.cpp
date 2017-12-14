@@ -100,7 +100,7 @@ void ServicenodeList::StartAlias(std::string strAlias)
 
             bool fSuccess = CServicenodeBroadcast::Create(mne.getIp(), mne.getPrivKey(),
                                                           mne.getTxHash(), mne.getOutputIndex(),
-                                                          e.isEnabled() ? e.connectedWallets() : std::vector<std::string>(),
+                                                          e.isEnabled() ? e.connectedWallets() : std::vector<std::string>(), mne.getSalt(),
                                                           strError, mnb);
 
             if (fSuccess) {
@@ -148,7 +148,7 @@ void ServicenodeList::StartAll(std::string strCommand)
 
         bool fSuccess = CServicenodeBroadcast::Create(mne.getIp(), mne.getPrivKey(),
                                                       mne.getTxHash(), mne.getOutputIndex(),
-                                                      e.isEnabled() ? e.connectedWallets() : std::vector<std::string>(),
+                                                      e.isEnabled() ? e.connectedWallets() : std::vector<std::string>(), mne.getSalt(),
                                                       strError, mnb);
 
         if (fSuccess) {

@@ -52,6 +52,8 @@ public:
     int status;
     std::string notCapableReason;
 
+    std::string servicenodeSalt;
+
     CActiveServicenode()
     {
         status = ACTIVE_SERVICENODE_INITIAL;

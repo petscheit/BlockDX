@@ -8,9 +8,9 @@
 
 CServicenodeConfig servicenodeConfig;
 
-void CServicenodeConfig::add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex)
+void CServicenodeConfig::add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex, std::string salt)
 {
-    CServicenodeEntry cme(alias, ip, privKey, txHash, outputIndex);
+    CServicenodeEntry cme(alias, ip, privKey, txHash, outputIndex, salt);
     entries.push_back(cme);
 }
 
@@ -36,7 +36,7 @@ bool CServicenodeConfig::read(std::string& strErr)
         if (line.empty()) continue;
 
         std::istringstream iss(line);
-        std::string comment, alias, ip, privKey, txHash, outputIndex;
+        std::string comment, alias, ip, privKey, txHash, outputIndex, salt;
 
         if (iss >> comment) {
             if (comment.at(0) == '#') continue;
@@ -44,10 +44,10 @@ bool CServicenodeConfig::read(std::string& strErr)
             iss.clear();
         }
 
-        if (!(iss >> alias >> ip >> privKey >> txHash >> outputIndex)) {
+        if (!(iss >> alias >> ip >> privKey >> txHash >> outputIndex >> salt)) {
             iss.str(line);
             iss.clear();
-            if (!(iss >> alias >> ip >> privKey >> txHash >> outputIndex)) {
+            if (!(iss >> alias >> ip >> privKey >> txHash >> outputIndex >> salt)) {
                 strErr = _("Could not parse servicenode.conf") + "\n" +
                          strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"";
                 streamConfig.close();
@@ -72,7 +72,7 @@ bool CServicenodeConfig::read(std::string& strErr)
         }
 
 
-        add(alias, ip, privKey, txHash, outputIndex);
+        add(alias, ip, privKey, txHash, outputIndex, salt);
     }
 
     streamConfig.close();

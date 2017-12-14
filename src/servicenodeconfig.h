@@ -27,15 +27,17 @@ public:
         std::string privKey;
         std::string txHash;
         std::string outputIndex;
+        std::string salt;
 
     public:
-        CServicenodeEntry(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex)
+        CServicenodeEntry(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex, std::string salt)
         {
             this->alias = alias;
             this->ip = ip;
             this->privKey = privKey;
             this->txHash = txHash;
             this->outputIndex = outputIndex;
+            this->salt = salt;
         }
 
         const std::string& getAlias() const
@@ -89,6 +91,16 @@ public:
         {
             this->ip = ip;
         }
+
+        const std::string& getSalt() const
+        {
+            return salt;
+        }
+
+        void setSalt(const std::string& salt)
+        {
+            this->salt = salt;
+        }
     };
 
     CServicenodeConfig()
@@ -98,7 +110,7 @@ public:
 
     void clear();
     bool read(std::string& strErr);
-    void add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex);
+    void add(std::string alias, std::string ip, std::string privKey, std::string txHash, std::string outputIndex, std::string salt);
 
     std::vector<CServicenodeEntry>& getEntries()
     {
