@@ -13,7 +13,7 @@
   <property name="minimumSize">
    <size>
     <width>960</width>
-    <height>0</height>
+    <height>615</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -22,6 +22,12 @@
   <layout class="QVBoxLayout" name="topLayout">
    <item>
     <widget class="QLabel" name="labelAlerts">
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>30</height>
+      </size>
+     </property>
      <property name="visible">
       <bool>false</bool>
      </property>
@@ -42,6 +48,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QFrame" name="frame">
+         <property name="minimumSize">
+          <size>
+           <width>465</width>
+           <height>204</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -53,6 +65,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QLabel" name="label_5">
+              <property name="minimumSize">
+               <size>
+                <width>64</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -66,6 +84,12 @@
             </item>
             <item>
              <widget class="QLabel" name="labelWalletStatus">
+              <property name="minimumSize">
+               <size>
+                <width>85</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="cursor">
                <cursorShape>WhatsThisCursor</cursorShape>
               </property>
@@ -105,6 +129,12 @@
             </property>
             <item row="2" column="2">
              <widget class="QLabel" name="labelWatchPending">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -130,6 +160,12 @@
             </item>
             <item row="2" column="1">
              <widget class="QLabel" name="labelUnconfirmed">
+              <property name="minimumSize">
+               <size>
+                <width>119</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -155,6 +191,12 @@
             </item>
             <item row="3" column="2">
              <widget class="QLabel" name="labelWatchImmature">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -180,6 +222,12 @@
             </item>
             <item row="4" column="0" colspan="2">
              <widget class="Line" name="lineSpendableBalance">
+              <property name="minimumSize">
+               <size>
+                <width>202</width>
+                <height>3</height>
+               </size>
+              </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -196,7 +244,7 @@
               <property name="minimumSize">
                <size>
                 <width>140</width>
-                <height>0</height>
+                <height>3</height>
                </size>
               </property>
               <property name="orientation">
@@ -206,6 +254,12 @@
             </item>
             <item row="5" column="0">
              <widget class="QLabel" name="labelTotalText">
+              <property name="minimumSize">
+               <size>
+                <width>71</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="text">
                <string>Total:</string>
               </property>
@@ -213,6 +267,12 @@
             </item>
             <item row="3" column="1">
              <widget class="QLabel" name="labelImmature">
+              <property name="minimumSize">
+               <size>
+                <width>119</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -251,6 +311,12 @@
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="labelImmatureText">
+              <property name="minimumSize">
+               <size>
+                <width>71</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="text">
                <string>Immature:</string>
               </property>
@@ -258,6 +324,12 @@
             </item>
             <item row="5" column="1">
              <widget class="QLabel" name="labelTotal">
+              <property name="minimumSize">
+               <size>
+                <width>119</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -283,6 +355,12 @@
             </item>
             <item row="5" column="2">
              <widget class="QLabel" name="labelWatchTotal">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -308,6 +386,12 @@
             </item>
             <item row="0" column="2">
              <widget class="QLabel" name="labelWatchonly">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>17</height>
+               </size>
+              </property>
               <property name="text">
                <string>Watch-only:</string>
               </property>
@@ -318,6 +402,12 @@
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="labelBalanceText">
+              <property name="minimumSize">
+               <size>
+                <width>71</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="text">
                <string>Available:</string>
               </property>
@@ -325,6 +415,12 @@
             </item>
             <item row="1" column="1">
              <widget class="QLabel" name="labelBalance">
+              <property name="minimumSize">
+               <size>
+                <width>119</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -350,6 +446,12 @@
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="labelWatchAvailable">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>18</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -375,6 +477,12 @@
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="labelPendingText">
+              <property name="minimumSize">
+               <size>
+                <width>71</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="text">
                <string>Pending:</string>
               </property>
@@ -382,6 +490,12 @@
             </item>
             <item row="0" column="1">
              <widget class="QLabel" name="labelSpendable">
+              <property name="minimumSize">
+               <size>
+                <width>119</width>
+                <height>17</height>
+               </size>
+              </property>
               <property name="text">
                <string>Spendable:</string>
               </property>
@@ -399,7 +513,7 @@
         <widget class="QFrame" name="frameObfuscation">
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>465</width>
            <height>350</height>
           </size>
          </property>
@@ -433,6 +547,12 @@
            </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_6">
+             <property name="minimumSize">
+              <size>
+               <width>47</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="text">
               <string>Status:</string>
              </property>
@@ -440,6 +560,12 @@
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_7">
+             <property name="minimumSize">
+              <size>
+               <width>84</width>
+               <height>25</height>
+              </size>
+             </property>
              <property name="text">
               <string>Completion:</string>
              </property>
@@ -447,6 +573,12 @@
            </item>
            <item row="1" column="1">
             <widget class="QProgressBar" name="obfuscationProgress">
+             <property name="minimumSize">
+              <size>
+               <width>154</width>
+               <height>25</height>
+              </size>
+             </property>
              <property name="maximumSize">
               <size>
                <width>154</width>
@@ -460,6 +592,12 @@
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="labelAnonymizedText">
+             <property name="minimumSize">
+              <size>
+               <width>145</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="text">
               <string>Obfuscation Balance:</string>
              </property>
@@ -467,6 +605,12 @@
            </item>
            <item row="2" column="1">
             <widget class="QLabel" name="labelAnonymized">
+             <property name="minimumSize">
+              <size>
+               <width>293</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="font">
               <font>
                <weight>75</weight>
@@ -480,6 +624,12 @@
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_8">
+             <property name="minimumSize">
+              <size>
+               <width>142</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="text">
               <string>Amount and Rounds:</string>
              </property>
@@ -487,6 +637,12 @@
            </item>
            <item row="3" column="1">
             <widget class="QLabel" name="labelAmountRounds">
+             <property name="minimumSize">
+              <size>
+               <width>293</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="text">
               <string>0 BLOCK / 0 Rounds</string>
              </property>
@@ -494,6 +650,12 @@
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_9">
+             <property name="minimumSize">
+              <size>
+               <width>128</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="text">
               <string>Submitted Denom:</string>
              </property>
@@ -501,6 +663,12 @@
            </item>
            <item row="4" column="1">
             <widget class="QLabel" name="labelSubmittedDenom">
+             <property name="minimumSize">
+              <size>
+               <width>293</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>The denominations you submitted to the Servicenode.&lt;br&gt;To mix, other users must submit the exact same denominations.</string>
              </property>
@@ -511,6 +679,12 @@
            </item>
            <item row="0" column="1">
             <widget class="QLabel" name="obfuscationEnabled">
+             <property name="minimumSize">
+              <size>
+               <width>293</width>
+               <height>17</height>
+              </size>
+             </property>
              <property name="text">
               <string>Enabled/Disabled</string>
              </property>
@@ -526,6 +700,12 @@
             <width>1</width>
             <height>1</height>
            </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>1</width>
+            <height>1</height>
+           </size>
           </property>
           <property name="palette">
            <palette>
@@ -970,6 +1150,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>221</width>
+            <height>56</height>
+           </size>
+          </property>
           <property name="text">
            <string>Start/Stop Mixing</string>
           </property>
@@ -982,6 +1168,12 @@
             <width>441</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>441</width>
+            <height>16</height>
+           </size>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1027,6 +1219,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>221</width>
+            <height>28</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Try to manually submit a Obfuscation request.</string>
           </property>
@@ -1048,6 +1246,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>221</width>
+            <height>28</height>
+           </size>
           </property>
           <property name="toolTip">
            <string>Reset the current status of Obfuscation (can interrupt Obfuscation if it's in the process of Mixing, which can cost you money!)</string>
@@ -1071,6 +1275,12 @@
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
             <widget class="QLabel" name="label_2">
+             <property name="minimumSize">
+              <size>
+               <width>88</width>
+               <height>20</height>
+              </size>
+             </property>
              <property name="font">
               <font>
                <weight>75</weight>
@@ -1084,6 +1294,12 @@
            </item>
            <item>
             <widget class="QLabel" name="labelObfuscationSyncStatus">
+             <property name="minimumSize">
+              <size>
+               <width>85</width>
+               <height>20</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the BlocknetDX network after a connection is established, but this process has not completed yet.</string>
              </property>
@@ -1140,6 +1356,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="minimumSize">
+          <size>
+           <width>302</width>
+           <height>321</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -1167,6 +1389,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="label_4">
+              <property name="minimumSize">
+               <size>
+                <width>143</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -1180,6 +1408,12 @@
             </item>
             <item>
              <widget class="QLabel" name="labelTransactionsStatus">
+              <property name="minimumSize">
+               <size>
+                <width>85</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="cursor">
                <cursorShape>WhatsThisCursor</cursorShape>
               </property>
@@ -1214,6 +1448,12 @@
           </item>
           <item>
            <widget class="QListView" name="listTransactions">
+            <property name="minimumSize">
+             <size>
+              <width>282</width>
+              <height>192</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">QListView { background: transparent; }</string>
             </property>
