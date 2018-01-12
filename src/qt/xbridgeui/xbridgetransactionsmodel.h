@@ -86,7 +86,9 @@ public:
         FirstColumn = Total,
         Size        = 1,
         BID         = 2,
-        State       = 3,
+        Date        = 3,
+        State       = 4,
+
         LastColumn  = State
     };
 

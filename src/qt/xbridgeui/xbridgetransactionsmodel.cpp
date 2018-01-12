@@ -9,14 +9,9 @@
 #include "xbridge/util/xutil.h"
 #include "xbridge/util/xbridgeerror.h"
 
-
 #include <QApplication>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-
-#include <thread>
-#include <iostream>
 
 //******************************************************************************
 //******************************************************************************
@@ -25,6 +20,7 @@ XBridgeTransactionsModel::XBridgeTransactionsModel()
     m_columns << trUtf8("TOTAL")
               << trUtf8("SIZE")
               << trUtf8("BID")
+              << trUtf8("DATE")
               << trUtf8("STATE");
 
     xuiConnector.NotifyXBridgePendingTransactionReceived.connect
@@ -72,9 +68,6 @@ int XBridgeTransactionsModel::columnCount(const QModelIndex &) const
 QVariant XBridgeTransactionsModel::data(const QModelIndex & idx, int role) const
 {
 
-
-    std::cout << "data thread: " << std::this_thread::get_id() << std::endl;
-
     if (!idx.isValid())
     {
         return QVariant();
@@ -113,6 +106,10 @@ QVariant XBridgeTransactionsModel::data(const QModelIndex & idx, int role) const
                 QString text = QString::number(bid, 'f', 12).remove(QRegExp("\\.?0+$"));
 
                 return QVariant(text);
+            }
+            case Date:
+            {
+                return QVariant(QString::fromUtf8(boost::posix_time::to_simple_string(d.created).c_str()));
             }
             case State:
             {
@@ -357,8 +354,6 @@ void XBridgeTransactionsModel::onTimer()
 
 void XBridgeTransactionsModel::onTransactionReceived(const XBridgeTransactionDescr & tx)
 {
-
-//    std::cout << "tx received thread: " << std::this_thread::get_id() << std::endl;
 
     for (unsigned int i = 0; i < m_transactions.size(); ++i)
     {
