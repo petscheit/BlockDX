@@ -298,7 +298,8 @@ public:
         // return crcField();
     }
 
-    uint32_t version() const       { return versionField(); }
+    uint32_t version()   const     { return versionField(); }
+    uint32_t timestamp() const     { return timestampField(); }
 
     XBridgeCommand  command() const       { return static_cast<XBridgeCommand>(commandField()); }
 

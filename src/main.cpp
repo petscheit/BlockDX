@@ -34,6 +34,7 @@
 #include "coinvalidator.h"
 
 #include <sstream>
+#include <ctime>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
@@ -75,6 +76,8 @@ CoinValidator &coinValidator = CoinValidator::instance();
 
 unsigned int nStakeMinAge = 60 * 60;
 int64_t nReserveBalance = 0;
+
+double nMaxTimeDiff = 2 * 60; // Max time difference in seconds for relaying packets
 
 /** Fees smaller than this (in duffs) are considered zero fee (for relaying and mining)
  * We are ~100 times smaller then bitcoin now (2015-06-23), set minRelayTxFee only 10 times higher
@@ -5565,21 +5568,33 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         std::vector<unsigned char> raw;
         vRecv >> raw;
 
-        uint256 hash = Hash(raw.begin(), raw.end());
+        uint256 hash = Hash(raw.begin(), raw.end()); 
         if (!pfrom->setKnown.count(hash))
         {
-            pfrom->setKnown.insert(hash);
-
-            // Relay
+            // Before relaying it further, check for validity
+            // Otherwise, everything (including completely invalid packets) will get relayed
+            XBridgePacketPtr packet(new XBridgePacket);
+            if (packet->copyFrom(raw) && fabs(difftime(packet->timestamp(), time(0))) <= nMaxTimeDiff /* && TODO check expiration by block hash once dev-expiration-by-block-hash is merged in*/)
             {
-                LOCK(cs_vNodes);
-                for  (CNode * pnode : vNodes)
+                pfrom->setKnown.insert(hash);
+
+                // Relay
                 {
-                    if (pnode->setKnown.insert(hash).second)
+                    LOCK(cs_vNodes);
+                    for  (CNode * pnode : vNodes)
                     {
-                        pnode->PushMessage("xbridge", raw);
+                        if (pnode->setKnown.insert(hash).second)
+                        {
+                            pnode->PushMessage("xbridge", raw);
+                        }
                     }
                 }
+            }
+            else 
+            {
+                // Add small penalty if receiving incomplete/misconstructed packets
+                // but don't ban it outright
+                Misbehaving(pfrom->GetId(), 10);
             }
 
             static bool isEnabled = xbridge::App::isEnabled();
