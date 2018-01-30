@@ -280,7 +280,8 @@ public:
     enum
     {
         // header, size, version, command, timestamp, pubkey, signature
-        headerSize       = 8*sizeof(uint32_t)+33+64,
+        headerSize       = 8*sizeof(uint32_t),
+        signHeaderSize   = 33 + 64,
         commandSize      = sizeof(uint32_t),
         timestampSize    = sizeof(uint32_t),
         addressSize      = 20,
@@ -309,18 +310,18 @@ public:
     const unsigned char * pubkey() const    { return pubkeyField(); }
     const unsigned char * signature() const { return signatureField(); }
 
-    void    alloc()                         { m_body.resize(headerSize + size()); }
+    void    alloc()                         { m_body.resize(headerSize + signHeaderSize + size()); }
 
     const std::vector<unsigned char> & body() const
                                             { return m_body; }
     unsigned char  * header()               { return &m_body[0]; }
-    unsigned char  * data()                 { return &m_body[headerSize]; }
+    unsigned char  * data()                 { return &m_body[headerSize + signHeaderSize]; }
 
     // boost::int32_t int32Data() const { return field32<2>(); }
 
     void    clear()
     {
-        m_body.resize(headerSize);
+        m_body.resize(headerSize + signHeaderSize);
         commandField() = 0;
         sizeField() = 0;
 
@@ -330,31 +331,31 @@ public:
 
     void resize(const uint32_t size)
     {
-        m_body.resize(size+headerSize);
-        sizeField() = size;
+        m_body.resize(size + headerSize + signHeaderSize);
+        sizeField() = size + signHeaderSize;
     }
 
     void    setData(const unsigned char data)
     {
-        m_body.resize(sizeof(data) + headerSize);
-        sizeField() = sizeof(data);
-        m_body[headerSize] = data;
+        m_body.resize(sizeof(data) + headerSize + signHeaderSize);
+        sizeField() = sizeof(data) + signHeaderSize;
+        m_body[headerSize + signHeaderSize] = data;
     }
 
     void    setData(const int32_t data)
     {
-        m_body.resize(sizeof(data) + headerSize);
-        sizeField() = sizeof(data);
+        m_body.resize(sizeof(data) + headerSize + signHeaderSize);
+        sizeField() = sizeof(data) + signHeaderSize;
         field32<2>() = data;
     }
 
     void    setData(const std::string & data)
     {
-        m_body.resize(data.size() + headerSize);
-        sizeField() = static_cast<uint32_t>(data.size());
+        m_body.resize(data.size() + headerSize + signHeaderSize);
+        sizeField() = static_cast<uint32_t>(data.size()) + signHeaderSize;
         if (data.size())
         {
-            data.copy((char *)(&m_body[headerSize]), data.size());
+            data.copy((char *)(&m_body[headerSize + signHeaderSize]), data.size());
         }
     }
 
@@ -365,13 +366,13 @@ public:
 
     void    setData(const unsigned char * data, const uint32_t size, const uint32_t offset = 0)
     {
-        unsigned int off = offset + headerSize;
+        unsigned int off = offset + headerSize + signHeaderSize;
         if (size)
         {
             if (m_body.size() < size+off)
             {
-                m_body.resize(size+off);
-                sizeField() = size+off-headerSize;
+                m_body.resize(size + off);
+                sizeField() = size + off - headerSize + signHeaderSize;
             }
             memcpy(&m_body[off], data, size);
         }
@@ -391,7 +392,7 @@ public:
         m_body.reserve(m_body.size() + sizeof(data));
         unsigned char * ptr = (unsigned char *)&data;
         std::copy(ptr, ptr+sizeof(data), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
     }
 
     void append(const uint32_t data)
@@ -399,7 +400,7 @@ public:
         m_body.reserve(m_body.size() + sizeof(data));
         unsigned char * ptr = (unsigned char *)&data;
         std::copy(ptr, ptr+sizeof(data), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
     }
 
     void append(const uint64_t data)
@@ -407,14 +408,14 @@ public:
         m_body.reserve(m_body.size() + sizeof(data));
         unsigned char * ptr = (unsigned char *)&data;
         std::copy(ptr, ptr+sizeof(data), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
     }
 
     void append(const unsigned char * data, const int size)
     {
         m_body.reserve(m_body.size() + size);
         std::copy(data, data+size, std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
     }
 
     void append(const std::string & data)
@@ -422,14 +423,14 @@ public:
         m_body.reserve(m_body.size() + data.size()+1);
         std::copy(data.begin(), data.end(), std::back_inserter(m_body));
         m_body.push_back(0);
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
     }
 
     void append(const std::vector<unsigned char> & data)
     {
         m_body.reserve(m_body.size() + data.size());
         std::copy(data.begin(), data.end(), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
     }
 
     bool copyFrom(const std::vector<unsigned char> & data)
@@ -442,7 +443,7 @@ public:
 
         m_body = data;
 
-        if (sizeField() != static_cast<uint32_t>(data.size())-headerSize)
+        if (sizeField() != static_cast<uint32_t>(data.size()) - headerSize + signHeaderSize)
         {
             ERR() << "incorrect data size " << __FUNCTION__;
             return false;
