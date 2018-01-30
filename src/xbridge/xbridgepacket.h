@@ -372,7 +372,7 @@ public:
             if (m_body.size() < size+off)
             {
                 m_body.resize(size + off);
-                sizeField() = size + off - headerSize + signHeaderSize;
+                sizeField() = size + off - headerSize;
             }
             memcpy(&m_body[off], data, size);
         }
@@ -392,7 +392,7 @@ public:
         m_body.reserve(m_body.size() + sizeof(data));
         unsigned char * ptr = (unsigned char *)&data;
         std::copy(ptr, ptr+sizeof(data), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
     }
 
     void append(const uint32_t data)
@@ -400,7 +400,7 @@ public:
         m_body.reserve(m_body.size() + sizeof(data));
         unsigned char * ptr = (unsigned char *)&data;
         std::copy(ptr, ptr+sizeof(data), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
     }
 
     void append(const uint64_t data)
@@ -408,14 +408,14 @@ public:
         m_body.reserve(m_body.size() + sizeof(data));
         unsigned char * ptr = (unsigned char *)&data;
         std::copy(ptr, ptr+sizeof(data), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
     }
 
     void append(const unsigned char * data, const int size)
     {
         m_body.reserve(m_body.size() + size);
         std::copy(data, data+size, std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
     }
 
     void append(const std::string & data)
@@ -423,19 +423,19 @@ public:
         m_body.reserve(m_body.size() + data.size()+1);
         std::copy(data.begin(), data.end(), std::back_inserter(m_body));
         m_body.push_back(0);
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
     }
 
     void append(const std::vector<unsigned char> & data)
     {
         m_body.reserve(m_body.size() + data.size());
         std::copy(data.begin(), data.end(), std::back_inserter(m_body));
-        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize + signHeaderSize;
+        sizeField() = static_cast<uint32_t>(m_body.size()) - headerSize;
     }
 
     bool copyFrom(const std::vector<unsigned char> & data)
     {
-        if (data.size() < headerSize)
+        if (data.size() < headerSize + signHeaderSize)
         {
             ERR() << "received data size less than packet header size " << __FUNCTION__;
             return false;
@@ -443,7 +443,7 @@ public:
 
         m_body = data;
 
-        if (sizeField() != static_cast<uint32_t>(data.size()) - headerSize + signHeaderSize)
+        if (sizeField() != static_cast<uint32_t>(data.size()) - headerSize)
         {
             ERR() << "incorrect data size " << __FUNCTION__;
             return false;
