@@ -8,10 +8,15 @@
 #include "xbridge/xuiconnector.h"
 #include "xbridge/util/xutil.h"
 #include "xbridge/util/xbridgeerror.h"
+#include "xbridge/posixtimeconversion.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <QApplication>
 #include <QDateTime>
+
+
+
 //******************************************************************************
 //******************************************************************************
 XBridgeTransactionsModel::XBridgeTransactionsModel()
@@ -423,7 +428,7 @@ QString XBridgeTransactionsModel::transactionState(const xbridge::TransactionDes
     {
         case xbridge::TransactionDescr::trInvalid:        return trUtf8("Invalid");
         case xbridge::TransactionDescr::trNew:            return trUtf8("New");
-        case xbridge::TransactionDescr::trPending:        return trUtf8("Open");
+        case xbridge::TransactionDescr::trPending:        return trUtf8("Pending");
         case xbridge::TransactionDescr::trAccepting:      return trUtf8("Accepting");
         case xbridge::TransactionDescr::trHold:           return trUtf8("Hold");
         case xbridge::TransactionDescr::trInitialized:    return trUtf8("Initialized");
