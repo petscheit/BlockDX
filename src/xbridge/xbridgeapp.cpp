@@ -934,8 +934,9 @@ xbridge::Error App::sendXBridgeTransaction(const std::string & from,
     return xbridge::Error::SUCCESS;
 }
 
-Error App::sendXBridgeDebugTransaction(const string &from, const string &fromCurrency, const string &to,
-                                       const string &toCurrency, const uint64_t &toAmount,
+Error App::sendXBridgeDebugTransaction(const string &from, const string &fromCurrency,
+                                       const string &to, const string &toCurrency,
+                                       const uint64_t &toAmount, const uint transactionCount,
                                        uint256 &id, uint256 &blockHash)
 {
     uint64_t fromAmount = 0;
@@ -960,128 +961,28 @@ Error App::sendXBridgeDebugTransaction(const string &from, const string &fromCur
 
     double utxoAmount = 0;
     std::vector<wallet::UtxoEntry> outputsForUse;
-    if(outputCounter_ < outputs.size()) {
-        auto entry = outputs[]
-    }
-    for (const wallet::UtxoEntry & entry : outputs)
-    {
-        utxoAmount += entry.amount;
-        outputsForUse.push_back(entry);
+    if(transactionCount + outputCounter_ < outputs.size()) {
 
-        // TODO calculate fee for outputsForUse.count()
 
-        if ((utxoAmount * TransactionDescr::COIN) > fromAmount)
-        {
-            break;
+        for (uint i = outputCounter_; i < outputCounter_ + transactionCount; i++) {
+            std::cout << "i = " << i << std::endl;
+            utxoAmount = outputs[i].amount;
+            outputsForUse.push_back(outputs[i]);
+            fromAmount = static_cast<uint64_t>(utxoAmount * TransactionDescr::COIN*0.75);
+            uint256 id = uint256();
+            uint256 hash = uint256();
+            sendXBridgeTransaction(from, fromCurrency, fromAmount, to, toCurrency, toAmount,id, hash);
+            // lock used coins
+            // TODO temporary disabled
+//             connFrom->lockCoins(ptr->usedCoins, true);
+
+//             sleep(1);
+
         }
-    }
-
-    if ((utxoAmount * TransactionDescr::COIN) < fromAmount)
-    {
-        WARN() << "insufficient funds for <" << fromCurrency << "> " << __FUNCTION__;
-        return xbridge::Error::INSIFFICIENT_FUNDS;
+        outputCounter_ += transactionCount;
     }
 
     // sign used coins
-    for (wallet::UtxoEntry & entry : outputsForUse)
-    {
-        std::string signature;
-        if (!connFrom->signMessage(entry.address, entry.toString(), signature))
-        {
-            WARN() << "funds not signed <" << fromCurrency << "> " << __FUNCTION__;
-            return xbridge::Error::FUNDS_NOT_SIGNED;
-        }
-
-        bool isInvalid = false;
-        entry.signature = DecodeBase64(signature.c_str(), &isInvalid);
-        if (isInvalid)
-        {
-            WARN() << "invalid signature <" << fromCurrency << "> " << __FUNCTION__;
-            return xbridge::Error::FUNDS_NOT_SIGNED;
-        }
-
-        entry.rawAddress = connFrom->toXAddr(entry.address);
-
-        if(entry.signature.size() != 65) {
-
-            ERR() << "incorrect signature length, need 20 bytes " << __FUNCTION__;
-            return xbridge::Error::INVALID_SIGNATURE;
-
-        }
-//        assert(entry.signature.size() == 65 && "incorrect signature length, need 20 bytes");
-        if(entry.rawAddress.size() != 20) {
-
-            ERR() << "incorrect raw address length, need 20 bytes " << __FUNCTION__;
-            return  xbridge::Error::INVALID_ADDRESS;
-
-        }
-//        assert(entry.rawAddress.size() == 20 && "incorrect raw address length, need 20 bytes");
-    }
-
-    boost::uint32_t timestamp = time(0);
-    blockHash = chainActive.Tip()->pprev->GetBlockHash();
-
-    std::vector<unsigned char> firstUtxoSig = outputsForUse.at(0).signature;
-
-    id = Hash(from.begin(), from.end(),
-              fromCurrency.begin(), fromCurrency.end(),
-              BEGIN(fromAmount), END(fromAmount),
-              to.begin(), to.end(),
-              toCurrency.begin(), toCurrency.end(),
-              BEGIN(toAmount), END(toAmount),
-              BEGIN(timestamp), END(timestamp),
-              blockHash.begin(), blockHash.end(),
-              firstUtxoSig.begin(), firstUtxoSig.end());
-
-    TransactionDescrPtr ptr(new TransactionDescr);
-    ptr->created      = boost::posix_time::from_time_t(timestamp);
-    ptr->txtime       = boost::posix_time::from_time_t(timestamp);
-    ptr->id           = id;
-    ptr->from         = connFrom->toXAddr(from);
-    ptr->fromCurrency = fromCurrency;
-    ptr->fromAmount   = fromAmount;
-    ptr->to           = connTo->toXAddr(to);
-    ptr->toCurrency   = toCurrency;
-    ptr->toAmount     = toAmount;
-    ptr->usedCoins    = outputsForUse;
-    ptr->blockHash    = blockHash;
-
-    // m key
-    connTo->newKeyPair(ptr->mPubKey, ptr->mPrivKey);
-    assert(ptr->mPubKey.size() == 33 && "bad pubkey size");
-
-    // x key
-    connTo->newKeyPair(ptr->xPubKey, ptr->xPrivKey);
-    assert(ptr->xPubKey.size() == 33 && "bad pubkey size");
-
-#ifdef LOG_KEYPAIR_VALUES
-    LOG() << "generated M keypair " << std::endl <<
-             "    pub    " << HexStr(ptr->mPubKey) << std::endl <<
-             "    pub id " << HexStr(connTo->getKeyId(ptr->mPubKey)) << std::endl <<
-             "    priv   " << HexStr(ptr->mPrivKey);
-    LOG() << "generated X keypair " << std::endl <<
-             "    pub    " << HexStr(ptr->xPubKey) << std::endl <<
-             "    pub id " << HexStr(connTo->getKeyId(ptr->xPubKey)) << std::endl <<
-             "    priv   " << HexStr(ptr->xPrivKey);
-#endif
-
-    // try send immediatelly
-    sendPendingTransaction(ptr);
-
-//    LOG() << "accept transaction " << util::to_str(ptr->id) << std::endl
-//          << "    from " << from << " (" << util::to_str(ptr->from) << ")" << std::endl
-//          << "             " << ptr->fromCurrency << " : " << ptr->fromAmount << std::endl
-//          << "    from " << to << " (" << util::to_str(ptr->to) << ")" << std::endl
-//          << "             " << ptr->toCurrency << " : " << ptr->toAmount << std::endl;
-
-    // lock used coins
-    // TODO temporary disabled
-     connFrom->lockCoins(ptr->usedCoins, true);
-
-    {
-        boost::mutex::scoped_lock l(m_p->m_txLocker);
-        m_p->m_transactions[id] = ptr;
-    }
 
     return xbridge::Error::SUCCESS;
 

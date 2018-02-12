@@ -75,7 +75,7 @@ public:
                                                const std::string & fromCurrency,
                                                const std::string & to,
                                                const std::string & toCurrency,
-                                               const uint64_t & toAmount,
+                                               const uint64_t & toAmount, const uint transactionCount,
                                                uint256 & id,
                                                uint256& blockHash);
 
