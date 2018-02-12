@@ -1077,3 +1077,37 @@ json_spirit::Value dxGetOrderBook(const json_spirit::Array& params, bool fHelp)
         }
     }
 }
+Value dxDedbugCreateTransaction(const Array &params, bool fHelp)
+{
+    if (fHelp) {
+
+        throw runtime_error("dxDebugCreateTransaction "
+                            "(address from) (currency from)  "
+                            "(address to) (currency to) (amount to)\n"
+                            "Create xbridge transaction.");
+
+    }
+    if (params.size() != 5) {
+
+        Object error;
+        error.emplace_back(Pair("error",
+                                "Invalid number of parameters"));
+        error.emplace_back(Pair("code", xbridge::INVALID_PARAMETERS));
+        return  error;
+    }
+
+
+    std::string fromAddress     = params[0].get_str();
+    std::string fromCurrency    = params[1].get_str();
+    std::string toAddress       = params[2].get_str();
+    std::string toCurrency      = params[3].get_str();
+    double      toAmount        = params[4].get_real();
+
+    auto statusCode = xbridge::SUCCESS;
+
+    xbridge::App &app = xbridge::App::instance();
+
+
+    Object res;
+    return  res;
+}

@@ -399,6 +399,7 @@ extern json_spirit::Value dxGetCurrencies(const json_spirit::Array& params, bool
  */
 extern json_spirit::Value dxCreateTransaction(const json_spirit::Array& params, bool fHelp);
 
+extern json_spirit::Value dxDedbugCreateTransaction(const json_spirit::Array& params, bool fHelp);
 /**
  * @brief Accepts given transaction
  * @param params The list of input params:<br>
