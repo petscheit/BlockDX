@@ -1082,12 +1082,12 @@ Value dxDebugCreateTransaction(const Array &params, bool fHelp)
     if (fHelp) {
 
         throw runtime_error("dxDebugCreateTransaction "
-                            "(address from) (currency from)  "
-                            "(address to) (currency to) (amount to) (transaction count) \n "
-                            "Create xbridge transaction.");
+                            "(currency from)  "
+                            "(address to) (currency to) (transaction count) \n "
+                            "Create xbridge n=transactionCount transaction.");
 
     }
-    if (params.size() != 6) {
+    if (params.size() != 4) {
 
         Object error;
         error.emplace_back(Pair("error",
@@ -1097,12 +1097,11 @@ Value dxDebugCreateTransaction(const Array &params, bool fHelp)
     }
 
 
-    std::string fromAddress         = params[0].get_str();
-    std::string fromCurrency        = params[1].get_str();
-    std::string toAddress           = params[2].get_str();
-    std::string toCurrency          = params[3].get_str();
-    double      toAmount            = params[4].get_real();
-    uint        transactionCount    = static_cast<unsigned int>(params[5].get_int());
+
+    std::string fromCurrency        = params[0].get_str();
+    std::string toAddress           = params[1].get_str();
+    std::string toCurrency          = params[2].get_str();
+    uint        transactionCount    = static_cast<unsigned int>(params[3].get_int());
 
     auto statusCode = xbridge::SUCCESS;
 
@@ -1110,9 +1109,8 @@ Value dxDebugCreateTransaction(const Array &params, bool fHelp)
 
     uint256 id = uint256();
     uint256 blockHash = uint256();
-    statusCode = app.sendXBridgeDebugTransaction(fromAddress, fromCurrency, toAddress,
-                                                 toCurrency, xBridgeAmountFromReal(toAmount),
-                                                 transactionCount, id, blockHash);
+    statusCode = app.sendXBridgeDebugTransaction(fromCurrency, toAddress,
+                                                 toCurrency, transactionCount );
 
     Object res;
     res.emplace_back("status", "ok");

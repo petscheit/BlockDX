@@ -934,10 +934,10 @@ xbridge::Error App::sendXBridgeTransaction(const std::string & from,
     return xbridge::Error::SUCCESS;
 }
 
-Error App::sendXBridgeDebugTransaction(const string &from, const string &fromCurrency,
+Error App::sendXBridgeDebugTransaction(const string &fromCurrency,
                                        const string &to, const string &toCurrency,
-                                       const uint64_t &toAmount, const uint transactionCount,
-                                       uint256 &id, uint256 &blockHash)
+                                       const uint transactionCount
+                                       )
 {
     uint64_t fromAmount = 0;
     if (fromCurrency.size() > 8 || toCurrency.size() > 8)
@@ -964,20 +964,18 @@ Error App::sendXBridgeDebugTransaction(const string &from, const string &fromCur
     if(transactionCount + outputCounter_ < outputs.size()) {
 
 
+
+        std::srand(unsigned(std::time(0)));
         for (uint i = outputCounter_; i < outputCounter_ + transactionCount; i++) {
-            std::cout << "i = " << i << std::endl;
+            std::string fromAddress = outputs[0].address;
             utxoAmount = outputs[i].amount;
             outputsForUse.push_back(outputs[i]);
-            fromAmount = static_cast<uint64_t>(utxoAmount * TransactionDescr::COIN*0.75);
+            fromAmount = static_cast<uint64_t>(utxoAmount * TransactionDescr::COIN);
+
+            uint64_t toAmount = fromAmount * ((std::rand() % 10)+1);
             uint256 id = uint256();
-            uint256 hash = uint256();
-            sendXBridgeTransaction(from, fromCurrency, fromAmount, to, toCurrency, toAmount,id, hash);
-            // lock used coins
-            // TODO temporary disabled
-//             connFrom->lockCoins(ptr->usedCoins, true);
-
-//             sleep(1);
-
+            uint256 blockHash = uint256();
+            sendXBridgeTransaction(fromAddress, fromCurrency, fromAmount, to, toCurrency, toAmount,id, blockHash);
         }
         outputCounter_ += transactionCount;
     }

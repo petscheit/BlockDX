@@ -71,13 +71,9 @@ public:
                                           uint256 & id,
                                           uint256& blockHash);
 
-    xbridge::Error sendXBridgeDebugTransaction(const std::string & from,
-                                               const std::string & fromCurrency,
+    xbridge::Error sendXBridgeDebugTransaction(const std::string & fromCurrency,
                                                const std::string & to,
-                                               const std::string & toCurrency,
-                                               const uint64_t & toAmount, const uint transactionCount,
-                                               uint256 & id,
-                                               uint256& blockHash);
+                                               const std::string & toCurrency, const uint transactionCount);
 
 private:
     uint outputCounter_ = 0;
