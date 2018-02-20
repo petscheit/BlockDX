@@ -310,9 +310,14 @@ endif
 
 RES_IMAGES = \
   qt/res/images/about.png \
+  qt/res/images/aboutImage1.png \
+  qt/res/images/aboutImage1_bg.png \
+  qt/res/images/aboutImage2.png \
   qt/res/images/splash.png \
   qt/res/images/splash_testnet.png \
   qt/res/images/blocknetdx_logo_horizontal.png \
+  qt/res/images/BlockDX_Logo_Hor_Hifi_Pos_022718.png \
+  qt/res/images/Blocknet_Logo_Hor_Neg_022718.png \
   qt/res/images/blocknet_alt3_logo_text_trans_bg.png \
   qt/res/images/downArrow.png \
   qt/res/images/downArrow_small.png \
