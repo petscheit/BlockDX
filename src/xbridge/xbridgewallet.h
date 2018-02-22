@@ -51,10 +51,8 @@ public:
         , COIN(0)
         , minTxFee(0)
         , feePerByte(200)
-        , m_minAmount(0)
+        , minAmount(0)
         , dustAmount(0)
-        , isGetNewPubKeySupported(false)
-        , isImportWithNoScanSupported(false)
         , blockTime(0)
         , requiredConfirmations(0)
         , serviceNodeFee(.005)
@@ -83,19 +81,15 @@ public:
         COIN                        = other.COIN;
         minTxFee                    = other.minTxFee;
         feePerByte                  = other.feePerByte;
-        m_minAmount                 = other.m_minAmount;
+        minAmount                   = other.minAmount;
         dustAmount                  = other.dustAmount;
         method                      = other.method;
-        isGetNewPubKeySupported     = other.isGetNewPubKeySupported;
-        isImportWithNoScanSupported = other.isImportWithNoScanSupported;
         blockTime                   = other.blockTime;
         requiredConfirmations       = other.requiredConfirmations;
         // serviceNodeFee = other.serviceNodeFee;
 
         return *this;
     }
-
-    double      minAmount() const { return (double)m_minAmount / 100000; }
 
 // TODO temporary public
 public:
@@ -116,7 +110,7 @@ public:
     uint64_t                   COIN;
     uint64_t                   minTxFee;
     uint64_t                   feePerByte;
-    uint64_t                   m_minAmount;
+    uint64_t                   minAmount;
     uint64_t                   dustAmount;
     std::string                method;
     bool                       isGetNewPubKeySupported;

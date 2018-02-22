@@ -181,12 +181,11 @@ enum XBridgeCommand
     //    opponent public key, 33 bytes
     xbcTransactionCreateA = 10,
     //
-    // xbcTransactionCreatedA (72 bytes min)
+    // xbcTransactionCreatedA (104 bytes)
     //    uint160 hub address
     //    uint160 client address
     //    uint256 hub transaction id
     //    string deposit tx id
-    //    string inner script (TODO delete later)
     xbcTransactionCreatedA = 11,
     //
     // xbcTransactionCreateB (205 bytes min)
@@ -201,12 +200,11 @@ enum XBridgeCommand
     //    string A deposit tx id
     xbcTransactionCreateB = 12,
     //
-    // xbcTransactionCreatedB (72 bytes min)
+    // xbcTransactionCreatedB (104 bytes min)
     //    uint160 hub address
     //    uint160 client address
     //    uint256 hub transaction id
     //    string deposit tx id
-    //    string inner script (TODO delete later)
     xbcTransactionCreatedB = 13,
 
     //

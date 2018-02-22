@@ -107,9 +107,6 @@ public:
     std::string                a_refTx() const;
     std::string                a_bintxid() const;
 
-    // TODO remove script
-    std::vector<unsigned char> a_innerScript() const;
-
     uint256                    a_datatxid() const;
     std::vector<unsigned char> a_pk1() const;
 
@@ -122,9 +119,6 @@ public:
     std::string                b_refTx() const;
     std::string                b_bintxid() const;
 
-    // TODO remove script
-    std::vector<unsigned char> b_innerScript() const;
-
     // uint256                    b_datatxid() const;
     std::vector<unsigned char> b_pk1() const;
 
@@ -134,8 +128,7 @@ public:
                                        const uint256 & datatxid,
                                        const std::vector<unsigned char> & pk);
     bool                       setBinTxId(const std::vector<unsigned char> &addr,
-                                          const std::string & id,
-                                          const std::vector<unsigned char> & innerScript);
+                                          const std::string & id);
 
 public:
     boost::mutex               m_lock;
@@ -163,9 +156,6 @@ private:
 
     std::string                m_bintxid1;
     std::string                m_bintxid2;
-
-    std::vector<unsigned char> m_innerScript1;
-    std::vector<unsigned char> m_innerScript2;
 
     XBridgeTransactionMember   m_a;
     XBridgeTransactionMember   m_b;

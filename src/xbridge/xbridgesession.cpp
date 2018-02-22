@@ -1549,8 +1549,9 @@ bool Session::Impl::processTransactionCreate(XBridgePacketPtr packet)
     }
 
     // lock time
-    uint32_t lTime = connFrom->lockTime(xtx->role);
-    if (lTime == 0)
+    uint32_t llTime = connFrom->lockTime(xtx->role);
+    uint32_t luTime = connTo->lockTime(xtx->role == 'A' ? 'B' : 'A');
+    if (llTime == 0 || luTime == 0)
     {
         LOG() << "lockTime error, transaction canceled " << __FUNCTION__;
         sendCancelTransaction(xtx, crRpcError);
@@ -1571,9 +1572,13 @@ bool Session::Impl::processTransactionCreate(XBridgePacketPtr packet)
              "    x id     " << HexStr(hx);
 #endif
 
-    // create address for first tx
-    connFrom->createDepositUnlockScript(xtx->mPubKey, mPubKey, hx, lTime, xtx->innerScript);
-    xtx->depositP2SH = connFrom->scriptIdToString(connFrom->getScriptId(xtx->innerScript));
+    // create address for deposit
+    connFrom->createDepositUnlockScript(xtx->mPubKey, mPubKey, hx, llTime, xtx->lockScript);
+    xtx->lockP2SH = connFrom->scriptIdToString(connFrom->getScriptId(xtx->lockScript));
+
+    // create address for opponent deposit
+    connTo->createDepositUnlockScript(mPubKey, xtx->mPubKey, hx, luTime, xtx->unlockScript);
+    xtx->unlockP2SH = connTo->scriptIdToString(connFrom->getScriptId(xtx->unlockScript));
 
     // depositTx
     {
@@ -1589,7 +1594,7 @@ bool Session::Impl::processTransactionCreate(XBridgePacketPtr packet)
         // outputs
 
         // amount
-        outputs.push_back(std::make_pair(xtx->depositP2SH, outAmount+fee2));
+        outputs.push_back(std::make_pair(xtx->lockP2SH, outAmount+fee2));
 
         // rest
         if (inAmount > outAmount+fee1+fee2)
@@ -1645,7 +1650,7 @@ bool Session::Impl::processTransactionCreate(XBridgePacketPtr packet)
 
         if (!connFrom->createRefundTransaction(inputs, outputs,
                                                xtx->mPubKey, xtx->mPrivKey,
-                                               xtx->innerScript, lTime,
+                                               xtx->lockScript, llTime,
                                                xtx->refTxId, xtx->refTx))
         {
             // cancel transaction
@@ -1699,8 +1704,6 @@ bool Session::Impl::processTransactionCreate(XBridgePacketPtr packet)
     reply->append(thisAddress);
     reply->append(txid.begin(), 32);
     reply->append(xtx->binTxId);
-    reply->append(static_cast<uint32_t>(xtx->innerScript.size()));
-    reply->append(xtx->innerScript);
 
     reply->sign(xtx->mPubKey, xtx->mPrivKey);
 
@@ -1715,11 +1718,11 @@ bool Session::Impl::processTransactionCreatedA(XBridgePacketPtr packet)
 {
     DEBUG_TRACE();
 
-    // size must be > 72 bytes
-    if (packet->size() < 72)
+    // size must be > 104 bytes
+    if (packet->size() < 104)
     {
         ERR() << "invalid packet size for xbcTransactionCreatedA "
-              << "need more than 74 received " << packet->size() << " "
+              << "need more than 104 received " << packet->size() << " "
               << __FUNCTION__;
         return false;
     }
@@ -1747,12 +1750,6 @@ bool Session::Impl::processTransactionCreatedA(XBridgePacketPtr packet)
     std::string binTxId(reinterpret_cast<const char *>(packet->data()+offset));
     offset += binTxId.size()+1;
 
-    uint32_t innerSize = *reinterpret_cast<uint32_t *>(packet->data()+offset);
-    offset += sizeof(uint32_t);
-
-    std::vector<unsigned char> innerScript(packet->data()+offset, packet->data()+offset+innerSize);
-    // offset += innerScript.size();
-
     TransactionPtr tr = e.transaction(txid);
     if (!packet->verify(tr->a_pk1()) && !packet->verify(tr->b_pk1()))
     {
@@ -1771,7 +1768,7 @@ bool Session::Impl::processTransactionCreatedA(XBridgePacketPtr packet)
         return true;
     }
 
-    if (e.updateTransactionWhenCreatedReceived(tr, from, binTxId, innerScript))
+    if (e.updateTransactionWhenCreatedReceived(tr, from, binTxId))
     {
         // wtf ?
         ERR() << "invalid createdA " << __FUNCTION__;
@@ -1805,11 +1802,11 @@ bool Session::Impl::processTransactionCreatedB(XBridgePacketPtr packet)
 {
     DEBUG_TRACE();
 
-    // size must be > 72 bytes
-    if (packet->size() < 72)
+    // size must be > 104 bytes
+    if (packet->size() < 104)
     {
         ERR() << "invalid packet size for xbcTransactionCreated "
-              << "need more than 74 received " << packet->size() << " "
+              << "need more than 104 received " << packet->size() << " "
               << __FUNCTION__;
         return false;
     }
@@ -1837,12 +1834,6 @@ bool Session::Impl::processTransactionCreatedB(XBridgePacketPtr packet)
     std::string binTxId(reinterpret_cast<const char *>(packet->data()+offset));
     offset += binTxId.size()+1;
 
-    uint32_t innerSize = *reinterpret_cast<uint32_t *>(packet->data()+offset);
-    offset += sizeof(uint32_t);
-
-    std::vector<unsigned char> innerScript(packet->data()+offset, packet->data()+offset+innerSize);
-    // offset += innerScript.size();
-
     TransactionPtr tr = e.transaction(txid);
     if (!packet->verify(tr->a_pk1()) && !packet->verify(tr->b_pk1()))
     {
@@ -1861,7 +1852,7 @@ bool Session::Impl::processTransactionCreatedB(XBridgePacketPtr packet)
         return true;
     }
 
-    if (e.updateTransactionWhenCreatedReceived(tr, from, binTxId, innerScript))
+    if (e.updateTransactionWhenCreatedReceived(tr, from, binTxId))
     {
         if (tr->state() == xbridge::Transaction::trCreated)
         {
@@ -1877,8 +1868,6 @@ bool Session::Impl::processTransactionCreatedB(XBridgePacketPtr packet)
             reply->append(m_myid);
             reply->append(txid.begin(), 32);
             reply->append(tr->b_bintxid());
-            reply->append(static_cast<uint32_t>(tr->b_innerScript().size()));
-            reply->append(tr->b_innerScript());
 
             reply->sign(e.pubKey(), e.privKey());
 
@@ -1895,11 +1884,11 @@ bool Session::Impl::processTransactionConfirmA(XBridgePacketPtr packet)
 {
     DEBUG_TRACE();
 
-    // size must be > 72 bytes
-    if (packet->size() < 72)
+    // size must be > 104 bytes
+    if (packet->size() < 104)
     {
         LOG() << "incorrect packet size for xbcTransactionConfirmA "
-              << "need more than 72 received " << packet->size() << " "
+              << "need more than 104 received " << packet->size() << " "
               << __FUNCTION__;
         return false;
     }
@@ -1913,12 +1902,6 @@ bool Session::Impl::processTransactionConfirmA(XBridgePacketPtr packet)
 
     std::string binTxId(reinterpret_cast<const char *>(packet->data()+offset));
     offset += binTxId.size()+1;
-
-    uint32_t innerSize = *reinterpret_cast<uint32_t *>(packet->data()+offset);
-    offset += sizeof(uint32_t);
-
-    std::vector<unsigned char> innerScript(packet->data()+offset, packet->data()+offset+innerSize);
-    offset += innerScript.size();
 
     xbridge::App & xapp = xbridge::App::instance();
 
@@ -1983,7 +1966,7 @@ bool Session::Impl::processTransactionConfirmA(XBridgePacketPtr packet)
 
         if (!conn->createPaymentTransaction(inputs, outputs,
                                             xtx->mPubKey, xtx->mPrivKey,
-                                            xtx->xPubKey, innerScript,
+                                            xtx->xPubKey, xtx->unlockScript,
                                             xtx->payTxId, xtx->payTx))
         {
             // cancel transaction
@@ -2044,11 +2027,11 @@ bool Session::Impl::processTransactionConfirmedA(XBridgePacketPtr packet)
 {
     DEBUG_TRACE();
 
-    // size must be > 72 bytes
-    if (packet->size() <= 72)
+    // size must be > 104 bytes
+    if (packet->size() <= 104)
     {
         ERR() << "invalid packet size for xbcTransactionConfirmedA "
-              << "need 72 bytes min " << packet->size() << " "
+              << "need 104 bytes min " << packet->size() << " "
               << __FUNCTION__;
         return false;
     }
@@ -2107,8 +2090,6 @@ bool Session::Impl::processTransactionConfirmedA(XBridgePacketPtr packet)
     reply2->append(txid.begin(), 32);
     reply2->append(xPubkey);
     reply2->append(tr->a_bintxid());
-    reply2->append(static_cast<uint32_t>(tr->a_innerScript().size()));
-    reply2->append(tr->a_innerScript());
 
     reply2->sign(e.pubKey(), e.privKey());
 
@@ -2144,12 +2125,6 @@ bool Session::Impl::processTransactionConfirmB(XBridgePacketPtr packet)
 
     std::string binTxId(reinterpret_cast<const char *>(packet->data()+offset));
     offset += binTxId.size()+1;
-
-    uint32_t innerSize = *reinterpret_cast<uint32_t *>(packet->data()+offset);
-    offset += sizeof(uint32_t);
-
-    std::vector<unsigned char> innerScript(packet->data()+offset, packet->data()+offset+innerSize);
-    offset += innerScript.size();
 
     xbridge::App & xapp = xbridge::App::instance();
 
@@ -2194,7 +2169,7 @@ bool Session::Impl::processTransactionConfirmB(XBridgePacketPtr packet)
 
         if (!conn->createPaymentTransaction(inputs, outputs,
                                             xtx->mPubKey, xtx->mPrivKey,
-                                            x, innerScript,
+                                            x, xtx->unlockScript,
                                             xtx->payTxId, xtx->payTx))
         {
             // cancel transaction

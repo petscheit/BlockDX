@@ -273,18 +273,25 @@ bool Transaction::isExpiredByBlockNumber() const
     LOCK(cs_main);
 
     if (mapBlockIndex.count(m_blockHash) == 0)
-        return true; //expired because we don't have this hash in blockchain
+    {
+        // expired because we don't have this hash in blockchain
+        return true;
+    }
 
-    if(m_state > trNew && !isFinished())
+    if (m_state > trNew && !isFinished())
+    {
         return false;
+    }
 
     CBlockIndex* blockindex = mapBlockIndex[m_blockHash];
 
     int trBlockHeight = blockindex->nHeight;
     int lastBlockHeight = chainActive.Height();
 
-    if(lastBlockHeight - trBlockHeight > blocksTTL)
+    if (lastBlockHeight - trBlockHeight > blocksTTL)
+    {
         return true;
+    }
 
     return false;
 }
@@ -350,13 +357,6 @@ std::string Transaction::a_bintxid() const
 
 //*****************************************************************************
 //*****************************************************************************
-std::vector<unsigned char> Transaction::a_innerScript() const
-{
-    return m_innerScript1;
-}
-
-//*****************************************************************************
-//*****************************************************************************
 uint256 Transaction::a_datatxid() const
 {
     return m_a_datatxid;
@@ -409,13 +409,6 @@ uint64_t Transaction::b_amount() const
 std::string Transaction::b_bintxid() const
 {
     return m_bintxid2;
-}
-
-//*****************************************************************************
-//*****************************************************************************
-std::vector<unsigned char> Transaction::b_innerScript() const
-{
-    return m_innerScript2;
 }
 
 //*****************************************************************************
@@ -491,19 +484,16 @@ bool Transaction::setKeys(const std::vector<unsigned char> & addr,
 //*****************************************************************************
 //*****************************************************************************
 bool Transaction::setBinTxId(const std::vector<unsigned char> & addr,
-                                    const std::string & id,
-                                    const std::vector<unsigned char> & innerScript)
+                                    const std::string & id)
 {
     if (m_b.source() == addr)
     {
         m_bintxid2     = id;
-        m_innerScript2 = innerScript;
         return true;
     }
     else if (m_a.source() == addr)
     {
         m_bintxid1     = id;
-        m_innerScript1 = innerScript;
         return true;
     }
     return false;

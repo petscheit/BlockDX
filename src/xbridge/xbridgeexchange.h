@@ -86,8 +86,7 @@ public:
                                                   const std::vector<unsigned char> & pk);
     bool updateTransactionWhenCreatedReceived(const TransactionPtr & tx,
                                               const std::vector<unsigned char> & from,
-                                              const std::string & binTxId,
-                                              const std::vector<unsigned char> & innerScript);
+                                              const std::string & binTxId);
     bool updateTransactionWhenConfirmedReceived(const TransactionPtr & tx,
                                                 const std::vector<unsigned char> & from);
 

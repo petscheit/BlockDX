@@ -78,9 +78,13 @@ struct TransactionDescr
     std::string                refTxId;
     std::string                refTx;
 
-    // multisig address and redeem script
-    std::string                depositP2SH;
-    std::vector<unsigned char> innerScript;
+    // my deposit lock and address
+    std::string                lockP2SH;
+    std::vector<unsigned char> lockScript;
+
+    // opponent deposit unlock and address
+    std::string                unlockP2SH;
+    std::vector<unsigned char> unlockScript;
 
     // prevtxs for signrawtransaction
     // std::string                prevtxs;
@@ -88,18 +92,18 @@ struct TransactionDescr
     XBridgePacketPtr           packet;
 
     // local created key (for exchange)
-    std::vector<unsigned char>    mPubKey;
-    std::vector<unsigned char>    mPrivKey;
+    std::vector<unsigned char> mPubKey;
+    std::vector<unsigned char> mPrivKey;
 
     // other node pubkey (set when ... )
-    std::vector<unsigned char>    oPubKey;
+    std::vector<unsigned char> oPubKey;
 
     // X key (secret data)
-    std::vector<unsigned char>    xPubKey;
-    std::vector<unsigned char>    xPrivKey;
+    std::vector<unsigned char> xPubKey;
+    std::vector<unsigned char> xPrivKey;
 
     // service node pub key
-    std::vector<unsigned char>    sPubKey;
+    std::vector<unsigned char> sPubKey;
 
     // used coins in transaction
     std::vector<xbridge::wallet::UtxoEntry> usedCoins;
@@ -218,8 +222,8 @@ private:
         refTx        = d.refTx;
 
         // multisig address and redeem script
-        depositP2SH     = d.depositP2SH;
-        innerScript       = d.innerScript;
+        lockP2SH     = d.lockP2SH;
+        lockScript       = d.lockScript;
 
         // prevtxs for signrawtransaction
         // prevtxs      = d.prevtxs;

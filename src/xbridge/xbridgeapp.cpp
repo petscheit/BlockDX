@@ -234,7 +234,7 @@ bool App::Impl::start()
                 wp.txVersion                   = s.get<uint32_t>(*i + ".TxVersion", 1);
                 wp.minTxFee                    = s.get<uint64_t>(*i + ".MinTxFee", 0);
                 wp.feePerByte                  = s.get<uint64_t>(*i + ".FeePerByte", 200);
-                wp.m_minAmount                 = s.get<uint64_t>(*i + ".MinimumAmount", 0);
+                wp.minAmount                 = s.get<uint64_t>(*i + ".MinimumAmount", 0);
                 wp.dustAmount                  = 3 * wp.minTxFee;
                 wp.method                      = s.get<std::string>(*i + ".CreateTxMethod");
                 wp.isGetNewPubKeySupported     = s.get<bool>(*i + ".GetNewKeySupported", false);
@@ -997,7 +997,6 @@ bool App::Impl::sendPendingTransaction(const TransactionDescrPtr & ptr)
             ptr->packet->append(entry.rawAddress);
             ptr->packet->append(entry.signature);
         }
-
     }
 
     ptr->packet->sign(ptr->mPubKey, ptr->mPrivKey);

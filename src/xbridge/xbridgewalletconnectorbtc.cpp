@@ -1291,10 +1291,10 @@ uint32_t BtcWalletConnector::lockTime(const char role) const
 //******************************************************************************
 //******************************************************************************
 bool BtcWalletConnector::createDepositUnlockScript(const std::vector<unsigned char> & myPubKey,
-                                                          const std::vector<unsigned char> & otherPubKey,
-                                                          const std::vector<unsigned char> & xdata,
-                                                          const uint32_t lockTime,
-                                                          std::vector<unsigned char> & resultSript)
+                                                   const std::vector<unsigned char> & otherPubKey,
+                                                   const std::vector<unsigned char> & xdata,
+                                                   const uint32_t lockTime,
+                                                   std::vector<unsigned char> & resultSript)
 {
     CScript inner;
     inner << OP_IF
@@ -1304,10 +1304,6 @@ bool BtcWalletConnector::createDepositUnlockScript(const std::vector<unsigned ch
                 << OP_DUP << OP_HASH160 << getKeyId(otherPubKey) << OP_EQUALVERIFY << OP_CHECKSIGVERIFY
                 << OP_SIZE << 33 << OP_EQUALVERIFY << OP_HASH160 << xdata << OP_EQUAL
           << OP_ENDIF;
-
-//    xbridge::XBitcoinAddress baddr;
-//    baddr.Set(CScriptID(inner), m_wallet.scriptPrefix[0]);
-//    xtx->multisig    = baddr.ToString();
 
     resultSript = std::vector<unsigned char>(inner.begin(), inner.end());
     return true;

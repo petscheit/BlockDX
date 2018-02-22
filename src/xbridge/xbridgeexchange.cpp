@@ -121,7 +121,7 @@ bool Exchange::init()
         wp.m_port       = port;
         wp.m_user       = user;
         wp.m_passwd     = passwd;
-        wp.m_minAmount  = minAmount;
+        wp.minAmount  = minAmount;
         wp.dustAmount = dustAmount;
         wp.txVersion  = txVersion;
         wp.minTxFee   = minTxFee;
@@ -310,13 +310,13 @@ bool Exchange::createTransaction(const uint256                        & txid,
 
     // check amounts
     {
-        if (wp.m_minAmount && wp.m_minAmount > sourceAmount)
+        if (wp.minAmount && wp.minAmount > sourceAmount)
         {
             LOG() << "tx " <<  txid.ToString()
                   << " rejected because sourceAmount less than minimum payment";
             return false;
         }
-        if (wp2.m_minAmount && wp2.m_minAmount > destAmount)
+        if (wp2.minAmount && wp2.minAmount > destAmount)
         {
             LOG() << "tx " << txid.ToString()
                   << " rejected because destAmount less than minimum payment";
@@ -334,11 +334,15 @@ bool Exchange::createTransaction(const uint256                        & txid,
                                                mpubkey));
     if (!tr->isValid())
     {
+        LOG() << "tx " << txid.ToString()
+              << " rejected because invalid " << __FUNCTION__;
         return false;
     }
 
     if(tr->isExpiredByBlockNumber())
     {
+        LOG() << "tx " << txid.ToString()
+              << " rejected because expired by block number " << __FUNCTION__;
         return false;
     }
 
@@ -613,10 +617,9 @@ bool Exchange::updateTransactionWhenInitializedReceived(const TransactionPtr &tx
 //*****************************************************************************
 bool Exchange::updateTransactionWhenCreatedReceived(const TransactionPtr & tx,
                                                            const std::vector<unsigned char> & from,
-                                                           const std::string & binTxId,
-                                                           const std::vector<unsigned char> & innerScript)
+                                                           const std::string & binTxId)
 {
-    if (!tx->setBinTxId(from, binTxId, innerScript))
+    if (!tx->setBinTxId(from, binTxId))
     {
         // wtf?
         LOG() << "unknown sender address for transaction, id <" << tx->id().GetHex() << ">";
