@@ -34,8 +34,7 @@ enum TxCancelReason
     crInvalidAddress  = 12,
     crBlocknetError   = 13,
     crBadADepositTx   = 14,
-    crBadBDepositTx   = 15,
-    crTimeout         = 16
+    crBadBDepositTx   = 15
 };
 
 //******************************************************************************
@@ -245,7 +244,10 @@ enum XBridgeCommand
     //    uint256  hub transaction id
     //    uint32_t reason
     xbcTransactionCancel = 22,
-
+    //
+    // xbcTransactionRollback
+    //    uint256 hub transaction id
+    xbcTransactionRollback = 23,
     //
     // xbcTransactionFinished
     //    uint160 client address

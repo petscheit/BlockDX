@@ -79,11 +79,6 @@ protected:
     SessionPtr getSession(const std::vector<unsigned char> & address);
 
 protected:
-    bool sendPendingTransaction(const TransactionDescrPtr & ptr);
-    bool sendAcceptingTransaction(const TransactionDescrPtr & ptr);
-    bool sendCancelTransaction(const uint256 &txid, const TxCancelReason &reason);
-
-protected:
     // workers
     std::deque<IoServicePtr>                           m_services;
     std::deque<WorkPtr>                                m_works;
@@ -383,7 +378,8 @@ bool App::Impl::stop()
 void App::sendPacket(const XBridgePacketPtr & packet)
 {
     static std::vector<unsigned char> addr(20, 0);
-    m_p->onSend(addr, packet->body());
+    std::vector<unsigned char> v(packet->header(), packet->header()+packet->allSize());
+    m_p->onSend(addr, v);
 }
 
 //*****************************************************************************
@@ -423,7 +419,9 @@ void App::Impl::onSend(const std::vector<unsigned char> & id, const std::vector<
 //*****************************************************************************
 void App::sendPacket(const std::vector<unsigned char> & id, const XBridgePacketPtr & packet)
 {
-    m_p->onSend(id, packet->body());
+    std::vector<unsigned char> v;
+    std::copy(packet->header(), packet->header()+packet->allSize(), std::back_inserter(v));
+    m_p->onSend(id, v);
 }
 
 //*****************************************************************************
@@ -916,7 +914,7 @@ xbridge::Error App::sendXBridgeTransaction(const std::string & from,
 #endif
 
     // try send immediatelly
-    m_p->sendPendingTransaction(ptr);
+    sendPendingTransaction(ptr);
 
 //    LOG() << "accept transaction " << util::to_str(ptr->id) << std::endl
 //          << "    from " << from << " (" << util::to_str(ptr->from) << ")" << std::endl
@@ -925,8 +923,7 @@ xbridge::Error App::sendXBridgeTransaction(const std::string & from,
 //          << "             " << ptr->toCurrency << " : " << ptr->toAmount << std::endl;
 
     // lock used coins
-    // TODO temporary disabled
-    // connFrom->lockCoins(ptr->usedCoins, true);
+    connFrom->lockCoins(ptr->usedCoins, true);
 
     {
         boost::mutex::scoped_lock l(m_p->m_txLocker);
@@ -939,13 +936,6 @@ xbridge::Error App::sendXBridgeTransaction(const std::string & from,
 //******************************************************************************
 //******************************************************************************
 bool App::sendPendingTransaction(const TransactionDescrPtr & ptr)
-{
-    return m_p->sendPendingTransaction(ptr);
-}
-
-//******************************************************************************
-//******************************************************************************
-bool App::Impl::sendPendingTransaction(const TransactionDescrPtr & ptr)
 {
     // if (!ptr->packet)
     {
@@ -1002,8 +992,7 @@ bool App::Impl::sendPendingTransaction(const TransactionDescrPtr & ptr)
 
     ptr->packet->sign(ptr->mPubKey, ptr->mPrivKey);
 
-    static std::vector<unsigned char> addr(20, 0);
-    onSend(addr, ptr->packet->body());
+    sendPacket(ptr->packet);
 
     ptr->state = TransactionDescr::trPending;
     xuiConnector.NotifyXBridgeTransactionChanged(ptr->id);
@@ -1093,13 +1082,15 @@ Error App::acceptXBridgeTransaction(const uint256     & id,
             return xbridge::Error::INVALID_SIGNATURE;
 
         }
-
+//        assert(entry.signature.size() == 65 && "incorrect signature length, need 20 bytes");
         if(entry.rawAddress.size() != 20) {
 
             ERR() << "incorrect raw address length, need 20 bytes " << __FUNCTION__;
             return  xbridge::Error::INVALID_ADDRESS;
 
         }
+
+//        assert(entry.rawAddress.size() == 20 && "incorrect raw address length, need 20 bytes");
     }
 
     ptr->from = connFrom->toXAddr(from);
@@ -1110,15 +1101,23 @@ Error App::acceptXBridgeTransaction(const uint256     & id,
     connTo->newKeyPair(ptr->mPubKey, ptr->mPrivKey);
     assert(ptr->mPubKey.size() == 33 && "bad pubkey size");
 
+    // x key
+    connTo->newKeyPair(ptr->xPubKey, ptr->xPrivKey);
+    assert(ptr->xPubKey.size() == 33 && "bad pubkey size");
+
 #ifdef LOG_KEYPAIR_VALUES
     LOG() << "generated M keypair " << std::endl <<
              "    pub    " << HexStr(ptr->mPubKey) << std::endl <<
              "    pub id " << HexStr(connTo->getKeyId(ptr->mPubKey)) << std::endl <<
              "    priv   " << HexStr(ptr->mPrivKey);
+    LOG() << "generated X keypair " << std::endl <<
+             "    pub    " << HexStr(ptr->xPubKey) << std::endl <<
+             "    pub id " << HexStr(connTo->getKeyId(ptr->xPubKey)) << std::endl <<
+             "    priv   " << HexStr(ptr->xPrivKey);
 #endif
 
     // try send immediatelly
-    m_p->sendAcceptingTransaction(ptr);
+    sendAcceptingTransaction(ptr);
 
 //    LOG() << "accept transaction " << util::to_str(ptr->id) << std::endl
 //          << "    from " << from << " (" << util::to_str(ptr->from) << ")" << std::endl
@@ -1128,14 +1127,15 @@ Error App::acceptXBridgeTransaction(const uint256     & id,
 
 
     // lock used coins
-    connTo->lockCoins(ptr->usedCoins, true);
+    // TODO temporary disabled
+    // connTo->lockUnspent(ptr->usedCoins, true);
 
     return xbridge::Error::SUCCESS;
 }
 
 //******************************************************************************
 //******************************************************************************
-bool App::Impl::sendAcceptingTransaction(const TransactionDescrPtr & ptr)
+bool App::sendAcceptingTransaction(const TransactionDescrPtr & ptr)
 {
     ptr->packet.reset(new XBridgePacket(xbcTransactionAccepting));
 
@@ -1174,7 +1174,7 @@ bool App::Impl::sendAcceptingTransaction(const TransactionDescrPtr & ptr)
 
     ptr->packet->sign(ptr->mPubKey, ptr->mPrivKey);
 
-    onSend(ptr->hubAddress, ptr->packet->body());
+    sendPacket(ptr->hubAddress, ptr->packet);
 
     ptr->state = TransactionDescr::trAccepting;
     xuiConnector.NotifyXBridgeTransactionChanged(ptr->id);
@@ -1187,33 +1187,11 @@ bool App::Impl::sendAcceptingTransaction(const TransactionDescrPtr & ptr)
 xbridge::Error App::cancelXBridgeTransaction(const uint256 &id,
                                              const TxCancelReason &reason)
 {
-    TransactionDescrPtr ptr = transaction(id);
-    if (!ptr || !ptr->isLocal())
-    {
-        return xbridge::TRANSACTION_NOT_FOUND;
-    }
-
-    if (ptr->state > TransactionDescr::trPending)
-    {
-        return xbridge::INVALID_STATE;
-    }
-
-    WalletConnectorPtr connFrom = connectorByCurrency(ptr->fromCurrency);
-    if (!connFrom)
-    {
-        // no session
-        WARN() << "no session for <" << ptr->fromCurrency << "> " << __FUNCTION__;
-        return xbridge::NO_SESSION;
-    }
-
-    if (m_p->sendCancelTransaction(id, reason))
+    if (sendCancelTransaction(id, reason))
     {
         TransactionDescrPtr xtx = transaction(id);
-
         xtx->state  = TransactionDescr::trCancelled;
         xtx->reason = reason;
-
-        connFrom->lockCoins(ptr->usedCoins, false);
 
         xuiConnector.NotifyXBridgeTransactionChanged(id);
 
@@ -1223,46 +1201,78 @@ xbridge::Error App::cancelXBridgeTransaction(const uint256 &id,
     return xbridge::SUCCESS;
 }
 
-void App::cancelMyXBridgeTransactions()
+//******************************************************************************
+//******************************************************************************
+xbridge::Error App::rollbackXBridgeTransaction(const uint256 & id)
 {
-    for(const auto &transaction : transactions())
+    WalletConnectorPtr conn;
     {
-        if(transaction.second == nullptr)
-            continue;
+        boost::mutex::scoped_lock l(m_p->m_txLocker);
 
-        if(transaction.second->isLocal())
-            cancelXBridgeTransaction(transaction.second->id, crUserRequest);
+        if (m_p->m_transactions.count(id))
+        {
+            TransactionDescrPtr ptr = m_p->m_transactions[id];
+            if (!ptr->refTx.empty())
+            {
+                conn = connectorByCurrency(ptr->fromCurrency);
+                if (!conn)
+                {
+                    ERR() << "unknown session for currency " + ptr->fromCurrency << __FUNCTION__;
+                    return xbridge::UNKNOWN_SESSION;
+                }
+            }
+        } else {
+            return xbridge::TRANSACTION_NOT_FOUND;
+        }
     }
+
+//    if (conn)
+//    {
+//        // session use m_txLocker, must be unlocked because not recursive
+//        if (!conn->rollbacktXBridgeTransaction(id))
+//        {
+//            LOG() << "revert tx failed for " << id.ToString();
+//            return false;
+//        }
+//
+//        sendRollbackTransaction(id);
+//    }
+    return xbridge::SUCCESS;
 }
 
 //******************************************************************************
 //******************************************************************************
-bool App::Impl::sendCancelTransaction(const uint256 & txid,
-                                      const TxCancelReason & reason)
+bool App::sendCancelTransaction(const uint256 & txid,
+                                const TxCancelReason & reason)
 {
     XBridgePacketPtr reply(new XBridgePacket(xbcTransactionCancel));
     reply->append(txid.begin(), 32);
     reply->append(static_cast<uint32_t>(reason));
 
-    TransactionDescrPtr ptr;
-    {
-        boost::mutex::scoped_lock l(m_txLocker);
-        if (m_transactions.count(txid))
-        {
-            ptr = m_transactions[txid];
-        }
-        else
-        {
-            return false;
-        }
-    }
-
+    TransactionDescrPtr ptr = transaction(txid);
     reply->sign(ptr->mPubKey, ptr->mPrivKey);
 
     static std::vector<unsigned char> addr(20, 0);
-    onSend(addr, reply->body());
+    sendPacket(addr, reply);
 
     // cancelled
+    return true;
+}
+
+//******************************************************************************
+//******************************************************************************
+bool App::sendRollbackTransaction(const uint256 & txid)
+{
+    XBridgePacketPtr reply(new XBridgePacket(xbcTransactionRollback));
+    reply->append(txid.begin(), 32);
+
+    TransactionDescrPtr ptr = transaction(txid);
+    reply->sign(ptr->mPubKey, ptr->mPrivKey);
+
+    static std::vector<unsigned char> addr(20, 0);
+    sendPacket(addr, reply);
+
+    // rolled back
     return true;
 }
 
