@@ -501,6 +501,31 @@ extern json_spirit::Value dxGetTradeHistory(const json_spirit::Array& params, bo
  */
 extern json_spirit::Value dxGetOrderBook(const json_spirit::Array& params, bool fHelp);
 
+/**
+ * @brief Returns the list of the orders created by the user
+ * @param params The list of input params, should be empty
+ * @param fHelp If is true then an exception with parameter description message will be thrown
+ * @return The list of the orders created by the user
+ * * Example:<br>
+ * \verbatim
+  [
+    {
+      "id": "2cd2a2ac-e6ff-4beb-9b45-d460bf83a092",
+      "maker": "SYS",
+      "maker_size": "0.100",
+      "maker_address": "yFMXXUJF7pSKegHTkTYMjfNxyUGVt1uCrL",
+      "taker": "LTC",
+      "taker_size": "0.01",
+      "taker_address": "yGDmuy8m1Li4ShNe7kGYusACw4oyiGiK5b",
+      "updated_at": "2018-01-15T18:25:05.12345Z",
+      "created_at": "2018-01-15T18:15:30.12345Z",
+      "status": "filled"
+    }
+  ]
+ * \endverbatim
+ */
+extern json_spirit::Value dxGetMyOrders(const json_spirit::Array& params, bool fHelp);
+
 /** @} */
 
 

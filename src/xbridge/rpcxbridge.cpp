@@ -1261,3 +1261,77 @@ Value dxGetOrderBook(const json_spirit::Array& params, bool fHelp)
         }
     }
 }
+
+//******************************************************************************
+//******************************************************************************
+json_spirit::Value dxGetMyOrders(const json_spirit::Array& params, bool fHelp)
+{
+    if (fHelp) {
+
+        throw runtime_error("dxGetMyOrders");
+
+    }
+
+    if (params.size() > 0) {
+
+        Object error;
+        error.emplace_back(Pair("error",
+                                "This function does not accept any parameter"));
+        error.emplace_back(Pair("code", xbridge::INVALID_PARAMETERS));
+        return  error;
+
+    }
+
+    xbridge::App & xapp = xbridge::App::instance();
+
+    // todo: should we lock?
+    Array r;
+
+    TransactionMap trList = xbridge::App::instance().transactions();
+    {
+        if(trList.empty()) {
+
+            LOG() << "empty  transactions list ";
+            return r;
+
+        }
+
+        // using TransactionMap    = std::map<uint256, xbridge::TransactionDescrPtr>;
+
+        for(auto i : trList)
+        {
+
+            const auto& t = *i.second;
+
+            if(!t.isLocal())
+                continue;
+
+            xbridge::WalletConnectorPtr connFrom = xapp.connectorByCurrency(t.fromCurrency);
+            xbridge::WalletConnectorPtr connTo   = xapp.connectorByCurrency(t.toCurrency);
+
+            Object o;
+
+            o.emplace_back(Pair("id", t.id.GetHex()));
+
+            // maker data
+            o.emplace_back(Pair("maker", t.fromCurrency));
+            o.emplace_back(Pair("maker_size", util::xBridgeValueFromAmount(t.fromAmount)));
+            o.emplace_back(Pair("maker_address", connFrom->fromXAddr(t.from)));
+            // taker data
+            o.emplace_back(Pair("taker", t.toCurrency));
+            o.emplace_back(Pair("taker_size", util::xBridgeValueFromAmount(t.toAmount)));
+            o.emplace_back(Pair("taker_address", connFrom->fromXAddr(t.to)));
+
+            // todo: check if it's ISO 8601
+            o.emplace_back(Pair("updated_at", bpt::to_iso_extended_string(t.txtime)));
+            o.emplace_back(Pair("created_at", bpt::to_iso_extended_string(t.created)));
+
+            // should we make returning value correspond to the description or vice versa?
+            // Order status: created|open|pending|filled|canceled
+            o.emplace_back(Pair("status", t.strState()));
+
+            r.emplace_back(o);
+        }
+    }
+    return r;
+}
