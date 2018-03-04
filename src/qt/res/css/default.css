@@ -114,8 +114,8 @@ color:#ddd;
 }
 
 QToolTip {
-background-color:#0a1742;
-color:#3d66ec;
+background-color:#575757;
+color:#cf5932;
 }
 
 QTextEdit {
@@ -385,7 +385,7 @@ min-width:10px;
 }
 
 QScrollBar::add-page, QScrollBar::sub-page { /* Scroll Bar Background */
-background:#F8F6F6;
+background:#A8A6A6;
 }
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { /* Define Arrow Button Dimensions */
@@ -396,7 +396,7 @@ height:16px;
 }
 
 QScrollBar::add-line:vertical:pressed, QScrollBar::sub-line:vertical:pressed, QScrollBar::add-line:horizontal:pressed, QScrollBar::sub-line:horizontal:pressed {
-background-color:#e0e0e0;
+background-color:#f0f0f0;
 }
 
 QScrollBar::sub-line:vertical { /* Vertical - top button position */
@@ -619,7 +619,8 @@ background-color:#F8F6F6;
 }
 
 QWidget#AddressBookPage QLabel#labelExplanation {
-background-color:#202525;
+background-color:#F8F6F6;
+color: #444f5d
 }
 
 QWidget#AddressBookPage QPushButton#newAddress { /* New Address Button */
@@ -807,11 +808,14 @@ background-color: rgba(255,0,0); */
 }
 
 QDialog#HelpMessageDialog QTextEdit#helpMessage {
-background-image: url(':/images/aboutImage1_bg');
+/*background-image: url(':/images/aboutImage1_bg');*/
+background-color: #4c5d6c;
+color: #efefef;
 }
 
 QDialog#HelpMessageDialog QScrollBar:vertical, QDialog#HelpMessageDialog QScrollBar:horizontal {
 border:0;
+background-color: #8c9dac;
 }
 
 /* About Blocknetdx Dialog */
