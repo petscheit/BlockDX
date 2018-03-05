@@ -857,7 +857,7 @@ Value dxCancelOrder(const Array &params, bool fHelp)
         return error;
     }
 
-    const auto res = xbridge::App::instance().cancelXBridgeTransaction(id, crRpcRequest);
+    const auto res = xbridge::App::instance().cancelXBridgeTransaction(id, xbridge::crRpcRequest);
     if (res != xbridge::SUCCESS)
     {
         Object obj;

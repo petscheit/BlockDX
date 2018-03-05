@@ -15,6 +15,8 @@
 //#include <assert.h>
 #include <string.h>
 
+namespace xbridge {
+
 //******************************************************************************
 //******************************************************************************
 enum TxCancelReason
@@ -37,6 +39,49 @@ enum TxCancelReason
     crBadBDepositTx   = 15,
     crTimeout         = 16
 };
+
+inline std::string txCancelReasonToString(const TxCancelReason & reason)
+{
+    switch (reason)
+    {
+    case crBadSettings:
+        return std::string("Bad settings");
+    case crUserRequest:
+        return std::string("User request");
+    case crNoMoney:
+        return std::string("No money");
+    case crBadUtxo:
+        return std::string("Bad utxo");
+    case crDust:
+        return std::string("Dust");
+    case crRpcError:
+        return std::string("RPC error");
+    case crNotSigned:
+        return std::string("Not signed");
+    case crNotAccepted:
+        return std::string("Not accepted");
+    case crRollback:
+        return std::string("Rollback");
+    case crRpcRequest:
+        return std::string("RPC request");
+    case crXbridgeRejected:
+        return std::string("Xbridge rejected");
+    case crInvalidAddress:
+        return std::string("Invalid address");
+    case crBlocknetError:
+        return std::string("Blocknet error");
+    case crBadADepositTx:
+        return std::string("Bad A deposit");
+    case crBadBDepositTx:
+        return std::string("Bad B deposit");
+    case crTimeout:
+        return std::string("Timeout");
+    default:
+        return std::string("Unknown");
+    }
+}
+
+} // namespace xbridge
 
 //******************************************************************************
 //******************************************************************************

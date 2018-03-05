@@ -2386,7 +2386,7 @@ bool Session::Impl::processTransactionCancel(XBridgePacketPtr packet)
     TransactionDescrPtr xtx = xapp.transaction(txid);
     if (!xtx)
     {
-        LOG() << "unknown transaction " << HexStr(txid) << " " << __FUNCTION__;
+        LOG() << "unknown transaction " << txid.GetHex() << " " << __FUNCTION__;
         return true;
     }
 
@@ -2395,6 +2395,9 @@ bool Session::Impl::processTransactionCancel(XBridgePacketPtr packet)
         LOG() << "invalid packet signature or packet from node " << __FUNCTION__;
         return true;
     }
+
+    LOG() << "cancelling order " << txid.GetHex() << " with reason " << txCancelReasonToString(reason);
+    xuiConnector.NotifyXBridgeTransactionCancelled(txid, reason);
 
     // rollback, commit revert transaction
     WalletConnectorPtr conn = xapp.connectorByCurrency(xtx->fromCurrency);
@@ -2420,13 +2423,17 @@ bool Session::Impl::processTransactionCancel(XBridgePacketPtr packet)
     xapp.removePackets(txid);
 
     std::string sid;
-    int32_t errCode = 0;
-    if (!conn->sendRawTransaction(xtx->refTx, sid, errCode))
+    int32_t errorCode = 0;
+    if (!conn->sendRawTransaction(xtx->refTx, sid, errorCode))
     {
         // TODO move packet to pending if error
         LOG() << "send rollback error, tx " << HexStr(txid) << " " << __FUNCTION__;
         xtx->state = TransactionDescr::trRollbackFailed;
-        xapp.processLater(txid, packet);
+
+        // don't process later dust amount and tx decode failed
+        if(errorCode != -22 &&
+           errorCode != -26)
+            xapp.processLater(txid, packet);
     }
     else
     {

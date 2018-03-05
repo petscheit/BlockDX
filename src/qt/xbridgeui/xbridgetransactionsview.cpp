@@ -10,6 +10,7 @@
 #include "wallet.h"
 #include "init.h"
 
+#include <QApplication>
 #include <QTableView>
 #include <QHeaderView>
 #include <QPushButton>
@@ -28,6 +29,15 @@ XBridgeTransactionsView::XBridgeTransactionsView(QWidget *parent)
     , m_dlg(m_txModel, this)
 {
     setupUi();
+}
+
+void XBridgeTransactionsView::customEvent(QEvent* event)
+{
+    if (event->type() == TRANSACTION_CANCELLED_EVENT)
+    {
+        auto e = static_cast<TransactionCancelledEvent *>(event);
+        onTransactionCancelled(e->id, e->reason);
+    }
 }
 
 //******************************************************************************
@@ -172,6 +182,9 @@ void XBridgeTransactionsView::setupUi()
     historicHeader->resizeSection(XBridgeTransactionsModel::State,      128);
     vbox->addWidget(m_historicTransactionsList);
 
+    xuiConnector.NotifyXBridgeTransactionCancelled.connect
+            (boost::bind(&XBridgeTransactionsView::onTransactionCancelledExtSignal, this, _1, _2));
+
     setLayout(vbox);
 }
 
@@ -214,6 +227,11 @@ QMenu * XBridgeTransactionsView::setupContextMenu(QModelIndex & index)
     }
 
     return contextMenu;
+}
+
+void XBridgeTransactionsView::onTransactionCancelledExtSignal(const uint256 & id, const xbridge::TxCancelReason & reason)
+{
+    QApplication::postEvent(this, new TransactionCancelledEvent(id, reason));
 }
 
 //******************************************************************************
@@ -359,4 +377,22 @@ void XBridgeTransactionsView::onToggleHideHistoricTransactions()
                                      trUtf8("Hide historic transactions"));
 
     m_historicTransactionsList->setVisible(!historicTrVisible);
+}
+
+//******************************************************************************
+//******************************************************************************
+void XBridgeTransactionsView::onTransactionCancelled(const uint256 & id, const xbridge::TxCancelReason & reason)
+{
+    if(reason == xbridge::TxCancelReason::crUserRequest ||
+       reason == xbridge::TxCancelReason::crRollback)
+        return;
+
+    QMessageBox::information(this,
+                             trUtf8("Order cancelled"),
+                             trUtf8("Order %1 cancelled \
+                                    with reason: %2").
+                                    arg(QString::fromStdString(id.GetHex())).
+                                    arg(QString::fromStdString(xbridge::txCancelReasonToString(reason))),
+                             QMessageBox::Ok,
+                             QMessageBox::Ok);
 }

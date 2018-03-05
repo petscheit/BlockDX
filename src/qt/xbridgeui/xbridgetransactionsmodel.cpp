@@ -288,14 +288,14 @@ xbridge::Error XBridgeTransactionsModel::newTransactionFromPending(const uint256
 //******************************************************************************
 xbridge::Error XBridgeTransactionsModel::cancelTransaction(const uint256 & id)
 {
-    return xbridge::App::instance().cancelXBridgeTransaction(id, crUserRequest);
+    return xbridge::App::instance().cancelXBridgeTransaction(id, xbridge::crUserRequest);
 }
 
 //******************************************************************************
 //******************************************************************************
 xbridge::Error XBridgeTransactionsModel::rollbackTransaction(const uint256 & id)
 {
-    return xbridge::App::instance().cancelXBridgeTransaction(id, crRollback);
+    return xbridge::App::instance().cancelXBridgeTransaction(id, xbridge::crRollback);
 }
 
 //******************************************************************************
